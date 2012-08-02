@@ -4,13 +4,13 @@
  You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-#include <vector>
+#include <iostream>
 
 //using namespace std;
 
 int main(int argc, char **argv) {
 
-    // std::cout << "Hello, world!" << std::endl;
+  std::cout << "Hello, world!" << std::endl;
 
-    return 0;
+  return 0;
 }
