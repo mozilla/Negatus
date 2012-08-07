@@ -28,7 +28,7 @@ FILE *checkPopen(std::string cmd, std::string mode) {
 
 bool cd(std::string path) {
   int success = chdir(path.c_str());
-  return (success == 1);
+  return (success == 0);
 }
 
 std::string cwd() {
@@ -42,6 +42,12 @@ uint64_t clok() {
   struct timespec ts;
   clock_gettime(CLOCK_REALTIME, &ts);
   return (uint64_t) ts.tv_sec * 1000 + ts.tv_nsec / 1000000.0;
+}
+
+bool dirw(std::string path) {
+  // maybe check first that dir exists and is a dir
+  int success = access(path.c_str(), W_OK);
+  return (success == 0);
 }
 
 int main(int argc, char **argv) {
@@ -58,6 +64,9 @@ int main(int argc, char **argv) {
 
   std::cout << clok() << std::endl;
   std::cout << time(NULL) << std::endl;
+
+  std::cout << dirw("/") << std::endl;
+  std::cout << dirw("/data/local") << std::endl;
 
   return 0;
 }
