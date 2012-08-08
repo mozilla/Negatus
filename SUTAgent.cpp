@@ -131,9 +131,13 @@ std::string os() {
 std::string systime() {
   PRTime now = PR_Now();
   PRExplodedTime ts;
-  PR_ExplodeTime(now, NULL, &ts);
+  PR_ExplodeTime(now, PR_LocalTimeParameters, &ts);
 
-  return std::string("");
+  char buffer[BUFSIZE];
+  sprintf(buffer, "%d/%02d/%02d %02d:%02d:%02d:%03d", ts.tm_year, ts.tm_month,
+    ts.tm_mday, ts.tm_hour, ts.tm_min, ts.tm_sec, ts.tm_usec / 1000);
+
+  return std::string(buffer);
 }
 
 // need to figure a better way
