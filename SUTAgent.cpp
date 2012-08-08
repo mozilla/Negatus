@@ -43,6 +43,26 @@ std::string getCmdOutput(std::string cmd) {
   return output;
 }
 
+std::string readTextFile(std::string path) {
+  const char *cpath = path.c_str();
+
+  FILE *fp = fopen(cpath, "r");
+  if (!fp) {
+    fprintf(stderr, "Error on fopen: %s, with mode r.\n", cpath);
+    exit(1);
+  }
+
+  char buffer[BUFSIZE];
+  std::string output;
+
+  while (fgets(buffer, BUFSIZE, fp)) {
+    output += std::string(buffer);
+  }
+
+  fclose(fp);
+  return output;
+}
+
 bool cd(std::string path) {
   int success = chdir(path.c_str());
   return (success == 0);
@@ -116,10 +136,15 @@ std::string os() {
 //   return std::string("");
 // }
 
+// need to figure a better way
 std::string uptime() {
   return getCmdOutput("uptime");
 }
 
+// need to figure a better way
+std::string screen() {
+  return readTextFile("/sys/devices/virtual/graphics/fb0/modes");
+}
 
 int main(int argc, char **argv) {
 
@@ -140,6 +165,8 @@ int main(int argc, char **argv) {
   std::cout << id() << std::endl;
 
   std::cout << uptime() << std::endl;
+
+  std::cout << screen() << std::endl;
 
   return 0;
 }
