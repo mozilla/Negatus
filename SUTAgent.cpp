@@ -16,7 +16,7 @@
 #include <unistd.h>
 
 // NSPR
-// #include <prtime.h>
+#include <prtime.h>
 
 #define BUFSIZE 1024
 
@@ -128,13 +128,13 @@ std::string os() {
 }
 
 // need to figure out how to build NSPR for ARM first
-// std::string systime() {
-//   PRTime now = PR_Now();
-//   PRExplodedTime ts;
-//   PR_ExplodeTime(now, NULL, &ts);
+std::string systime() {
+  PRTime now = PR_Now();
+  PRExplodedTime ts;
+  PR_ExplodeTime(now, NULL, &ts);
 
-//   return std::string("");
-// }
+  return std::string("");
+}
 
 // need to figure a better way
 std::string uptime() {
@@ -165,6 +165,8 @@ int main(int argc, char **argv) {
   std::cout << id() << std::endl;
 
   std::cout << uptime() << std::endl;
+
+  std::cout << systime() << std::endl;
 
   std::cout << screen() << std::endl;
 
