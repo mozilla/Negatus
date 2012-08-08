@@ -5,6 +5,10 @@ You need to:
 * have the Android NDK:
     * http://developer.android.com/tools/sdk/ndk/index.html
 
+* have the NSPR libraries installed under /usr/include/nspr:
+    * apt-get install libnspr4-dev, or
+    * download from https://ftp.mozilla.org/pub/mozilla.org/nspr/releases/
+
 * export these vars:
     * NDKPATH = path to the NDK folder
     * ADB = path to the adb binary
