@@ -7,6 +7,7 @@
 // C++
 #include <iostream>
 #include <vector>
+#include <sstream>
 
 // C
 #include <stdint.h>
@@ -61,6 +62,16 @@ std::string readTextFile(std::string path) {
 
   fclose(fp);
   return output;
+}
+
+int getFirstIntPos(char *str, int limit) {
+  for (int i = 0; i < limit; ++i) {
+    if (str[i] >= '0' && str[i] <= '9') {
+      return i;
+    }
+  }
+
+  return -1;
 }
 
 bool cd(std::string path) {
@@ -145,10 +156,44 @@ std::string uptime() {
   return getCmdOutput("uptime");
 }
 
+// TODO uptimimilis
+// TODO rotation
+
 // need to figure a better way
 std::string screen() {
   return readTextFile("/sys/devices/virtual/graphics/fb0/modes");
 }
+
+std::string memory() {
+  FILE *meminfo = fopen("/proc/meminfo", "r");
+  if (!meminfo) {
+    fprintf(stderr, "Error on fopen: /proc/meminfo, with mode r.\n");
+    exit(1);
+  }
+
+  unsigned int total, available;
+  char buffer[BUFSIZE];
+  fgets(buffer, BUFSIZE, meminfo);
+  sscanf(buffer + getFirstIntPos(buffer, BUFSIZE), "%u", &total);
+  fgets(buffer, BUFSIZE, meminfo);
+  sscanf(buffer + getFirstIntPos(buffer, BUFSIZE), "%u", &available);
+
+  sprintf(buffer, "Total: %d; Available: %d.\n", total * 1000, available * 1000);
+  return std::string(buffer);
+}
+
+std::string power() {
+  std::ostringstream ret;
+
+  ret << "Power status:" << std::endl;
+  ret << "\tCurrent %: ";
+  ret << readTextFile("/sys/class/power_supply/battery/capacity");
+  ret << "\tStatus: ";
+  ret << readTextFile("/sys/class/power_supply/battery/status");
+
+  return ret.str();
+}
+
 
 int main(int argc, char **argv) {
 
@@ -173,6 +218,10 @@ int main(int argc, char **argv) {
   std::cout << systime() << std::endl;
 
   std::cout << screen() << std::endl;
+
+  std::cout << power() << std::endl;
+
+  std::cout << memory() << std::endl;
 
   return 0;
 }
