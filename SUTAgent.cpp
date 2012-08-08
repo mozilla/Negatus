@@ -4,15 +4,19 @@
  You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
+// C++
 #include <iostream>
 #include <vector>
 
+// C
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 
+// NSPR
+// #include <prtime.h>
 
 #define BUFSIZE 1024
 
@@ -50,6 +54,64 @@ bool dirw(std::string path) {
   return (success == 0);
 }
 
+// TODO exec
+
+std::string hash(std::string path) {
+  const char *cpath = path.c_str();
+  char buffer[BUFSIZE];
+
+  if (access(cpath, F_OK | R_OK)) {
+    return std::string("");
+  }
+
+  sprintf(buffer, "md5sum %s", cpath);
+  FILE *md5 = checkPopen(buffer, "r");
+
+  std::string output;
+  while (fgets(buffer, BUFSIZE, md5)) {
+    output += std::string(buffer);
+  }
+
+  pclose(md5);
+  return output;
+}
+
+std::string id() {
+  std::string interfaces[3] = {"wlan0", "usb0", "lo"};
+  FILE *iface;
+  char buffer[BUFSIZE];
+
+  for (int i = 0; i < 3; ++i) {
+    sprintf(buffer, "/sys/class/net/%s/address", interfaces[i].c_str());
+    iface = fopen(buffer, "r");
+    if (!iface) {
+      continue;
+    }
+
+    fgets(buffer, BUFSIZE, iface);
+    fclose(iface);
+
+    return std::string(buffer);
+  }
+  return std::string("00:00:00:00:00:00");
+}
+
+std::string os() {
+  // not really supported yet. Best we could do is
+  // cat /system/sources.xml | grep gaia and another grep for m-c
+  return std::string("B2G");
+}
+
+// need to figure out how to build NSPR for ARM first
+// std::string systime() {
+//   PRTime now = PR_Now();
+//   PRExplodedTime ts;
+//   PR_ExplodeTime(now, NULL, &ts);
+
+//   return std::string("");
+// }
+
+
 int main(int argc, char **argv) {
 
   char output[BUFSIZE];
@@ -58,6 +120,7 @@ int main(int argc, char **argv) {
   while (fgets(output, BUFSIZE, uname)) {
     puts(output);
   }
+  pclose(uname);
 
   cd("/data/local");
   std::cout << cwd() << std::endl;
@@ -67,6 +130,11 @@ int main(int argc, char **argv) {
 
   std::cout << dirw("/") << std::endl;
   std::cout << dirw("/data/local") << std::endl;
+
+  std::cout << hash("/init.rc") << std::endl;
+  std::cout << hash("/weird/path") << std::endl;
+
+  std::cout << id() << std::endl;
 
   return 0;
 }
