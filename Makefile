@@ -8,7 +8,7 @@ CFLAGS := \
   -I$(TOOLCH)/arm-linux-androideabi/include/c++/4.6\
   -I$(TOOLCH)/arm-linux-androideabi/include/c++/4.6/arm-linux-androideabi\
   -I$(TOOLCH)/sysroot/usr/include \
-  -I/usr/include/nspr \
+  $(shell nspr-config --cflags) \
   -L. \
   -lstdc++ -lnspr4
 FILES := SUTAgent.cpp
