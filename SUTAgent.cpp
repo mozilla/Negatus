@@ -30,6 +30,19 @@ FILE *checkPopen(std::string cmd, std::string mode) {
   return fp;
 }
 
+std::string getCmdOutput(std::string cmd) {
+  FILE *fp = checkPopen(cmd, "r");
+  char buffer[BUFSIZE];
+  std::string output;
+
+  while (fgets(buffer, BUFSIZE, fp)) {
+    output += std::string(buffer);
+  }
+
+  pclose(fp);
+  return output;
+}
+
 bool cd(std::string path) {
   int success = chdir(path.c_str());
   return (success == 0);
@@ -65,15 +78,7 @@ std::string hash(std::string path) {
   }
 
   sprintf(buffer, "md5sum %s", cpath);
-  FILE *md5 = checkPopen(buffer, "r");
-
-  std::string output;
-  while (fgets(buffer, BUFSIZE, md5)) {
-    output += std::string(buffer);
-  }
-
-  pclose(md5);
-  return output;
+  return getCmdOutput(std::string(buffer));
 }
 
 std::string id() {
@@ -114,13 +119,7 @@ std::string os() {
 
 int main(int argc, char **argv) {
 
-  char output[BUFSIZE];
-
-  FILE *uname = checkPopen("uname -s -m -r", "r");
-  while (fgets(output, BUFSIZE, uname)) {
-    puts(output);
-  }
-  pclose(uname);
+  std::cout << getCmdOutput("uname -s -m -r") << std::endl;
 
   cd("/data/local");
   std::cout << cwd() << std::endl;
