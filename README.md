@@ -4,6 +4,7 @@ You need to:
 
 * have the Android NDK:
     * http://developer.android.com/tools/sdk/ndk/index.html
+    * use the **r5c** version
 
 * have the NSPR headers installed under /usr/include/nspr:
     * apt-get install libnspr4-dev, or
