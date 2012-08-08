@@ -116,6 +116,10 @@ std::string os() {
 //   return std::string("");
 // }
 
+std::string uptime() {
+  return getCmdOutput("uptime");
+}
+
 
 int main(int argc, char **argv) {
 
@@ -134,6 +138,8 @@ int main(int argc, char **argv) {
   std::cout << hash("/weird/path") << std::endl;
 
   std::cout << id() << std::endl;
+
+  std::cout << uptime() << std::endl;
 
   return 0;
 }
