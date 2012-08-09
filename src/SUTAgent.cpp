@@ -5,8 +5,6 @@
 */
 
 #include <iostream>
-#include <sstream>
-#include <string>
 
 #include "misc.h"
 #include "commands.h"
