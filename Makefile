@@ -11,9 +11,9 @@ CFLAGS := \
   -I$(TOOLCH)/lib/gcc/arm-linux-androideabi/4.6.x-google/include-fixed\
   -I$(TOOLCH)/arm-linux-androideabi/include/c++/4.6\
   -I$(TOOLCH)/arm-linux-androideabi/include/c++/4.6/arm-linux-androideabi\
-  -I$(TOOLCH)/sysroot/usr/include \
-  $(shell nspr-config --cflags) \
-  -L. \
+  -I$(TOOLCH)/sysroot/usr/include\
+  $(shell nspr-config --cflags)\
+  -Llibs\
   -lstdc++ -lnspr4
 FILES := SUTAgent.cpp commands.cpp misc.cpp
 CC=arm-linux-androideabi-g++
