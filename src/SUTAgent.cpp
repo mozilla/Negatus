@@ -52,5 +52,7 @@ int main(int argc, char **argv) {
   std::cout << mkdir("/data/local/testdir") << std::endl;
   std::cout << mkdir("/data/local") << std::endl;
 
+  std::cout << rm("/data/something") << std::endl;
+
   return 0;
 }

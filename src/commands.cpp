@@ -186,3 +186,42 @@ std::string mkdir(std::string path) {
   }
   return std::string("Could not create directory " + path);
 }
+
+// TODO push
+// TODO pull
+// TODO quit
+// TODO rebt
+
+bool rm(std::string path) {
+  char buffer[BUFSIZE];
+  sprintf(buffer, "rm %s 2>&1", path.c_str());
+  FILE *s = checkPopen(std::string(buffer), "r");
+  std::ostringstream output;
+
+  memset(buffer, 0, BUFSIZE);
+  fgets(buffer, BUFSIZE, s);
+
+  if (strlen(buffer) <= 1) {
+    return true;
+  }
+  return false;
+}
+
+bool rmdr(std::string path) {
+  char buffer[BUFSIZE];
+  sprintf(buffer, "rm -r %s 2>&1", path.c_str());
+  FILE *s = checkPopen(std::string(buffer), "r");
+  std::ostringstream output;
+
+  memset(buffer, 0, BUFSIZE);
+  fgets(buffer, BUFSIZE, s);
+
+  if (strlen(buffer) <= 1) {
+    return true;
+  }
+  return false;
+}
+
+std::string testroot() {
+  return std::string("/data/local");
+}
