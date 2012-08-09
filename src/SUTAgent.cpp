@@ -40,5 +40,7 @@ int main(int argc, char **argv) {
 
   std::cout << memory() << std::endl;
 
+  std::cout << ps() << std::endl;
+
   return 0;
 }

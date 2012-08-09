@@ -126,3 +126,15 @@ std::string power() {
 
   return ret.str();
 }
+
+std::string ps() {
+  FILE *p = checkPopen("ps | tr -s \" \" | cut -d' ' -f1,2,9 | tail +2", "r");
+  std::ostringstream ret;
+  char buffer[BUFSIZE];
+
+  while (fgets(buffer, BUFSIZE, p)) {
+    ret << buffer;
+  }
+
+  return ret.str();
+}

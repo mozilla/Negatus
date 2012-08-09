@@ -33,5 +33,6 @@ std::string uptime();
 std::string screen();
 std::string memory();
 std::string power();
+std::string ps();
 
 #endif
