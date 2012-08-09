@@ -26,7 +26,9 @@ uint64_t clok() {
 }
 
 bool dirw(std::string path) {
-  // maybe check first that dir exists and is a dir
+  if (isDir(path) != 0) {
+    return false;
+  }
   int success = access(path.c_str(), W_OK);
   return (success == 0);
 }
@@ -137,4 +139,50 @@ std::string ps() {
   }
 
   return ret.str();
+}
+
+int isDir(std::string path) {
+  // returns 0 if isDir, 1 if exists but not dir, 2 if does not exist
+  struct stat statbuf;
+  if (stat(path.c_str(), &statbuf) != -1) {
+    if (S_ISDIR(statbuf.st_mode)) {
+      return 0;
+    }
+    return 1;
+  }
+  return 2;
+}
+
+std::string ls(std::string path) {
+  struct dirent *dp;
+  DIR *dirp = opendir(path.c_str());
+  std::ostringstream ret;
+
+  if (!dirp) {
+    return std::string("");
+  }
+
+  dp = readdir(dirp);
+  while (dp) {
+    ret << std::string(dp->d_name) << std::endl;
+    dp = readdir(dirp);
+  }
+
+  closedir(dirp);
+  return ret.str();
+}
+
+std::string mkdir(std::string path) {
+  char buffer[BUFSIZE];
+  sprintf(buffer, "mkdir %s 2>&1", path.c_str());
+  FILE *s = checkPopen(std::string(buffer), "r");
+  std::ostringstream output;
+
+  memset(buffer, 0, BUFSIZE);
+  fgets(buffer, BUFSIZE, s);
+
+  if (strlen(buffer) <= 1) {
+    return std::string(path + " successfuly created");
+  }
+  return std::string("Could not create directory " + path);
 }

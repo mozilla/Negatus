@@ -10,11 +10,15 @@
 #include <string>
 #include <sstream>
 
-#include <unistd.h>
+#include <dirent.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <prtime.h>
 
@@ -34,5 +38,8 @@ std::string screen();
 std::string memory();
 std::string power();
 std::string ps();
+int isDir(std::string path);
+std::string ls(std::string path);
+std::string mkdir(std::string path);
 
 #endif

@@ -12,6 +12,7 @@
 #include "commands.h"
 
 
+// we can use the code in this function to write some tests
 int main(int argc, char **argv) {
 
   std::cout << getCmdOutput("uname -s -m -r") << std::endl;
@@ -41,6 +42,15 @@ int main(int argc, char **argv) {
   std::cout << memory() << std::endl;
 
   std::cout << ps() << std::endl;
+
+  std::cout << isDir("/data/local") << std::endl;
+  std::cout << isDir("/init.rc") << std::endl;
+  std::cout << isDir("/weird/path") << std::endl;
+
+  std::cout << ls("/") << std::endl;
+
+  std::cout << mkdir("/data/local/testdir") << std::endl;
+  std::cout << mkdir("/data/local") << std::endl;
 
   return 0;
 }
