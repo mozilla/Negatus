@@ -15,7 +15,9 @@ CFLAGS := \
   $(shell nspr-config --cflags)\
   -Llibs\
   -lstdc++ -lnspr4
-FILES := src/SUTAgent.cpp src/commands.cpp src/misc.cpp
+FILES := \
+  src/SUTAgent.cpp src/CommandEventHandler.cpp src/misc.cpp\
+  src/SessionEventHandler.cpp
 CC=arm-linux-androideabi-g++
 
 agent:

@@ -4,28 +4,28 @@
  You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-#include "commands.h"
+#include "CommandEventHandler.h"
 
 
-bool cd(std::string path) {
+bool CommandEventHandler::cd(std::string path) {
   int success = chdir(path.c_str());
   return (success == 0);
 }
 
-std::string cwd() {
+std::string CommandEventHandler::cwd() {
   char output[BUFSIZE];
   getcwd(output, BUFSIZE);
 
   return std::string(output);
 }
 
-uint64_t clok() {
+uint64_t CommandEventHandler::clok() {
   struct timespec ts;
   clock_gettime(CLOCK_REALTIME, &ts);
   return (uint64_t) ts.tv_sec * 1000 + ts.tv_nsec / 1000000.0;
 }
 
-bool dirw(std::string path) {
+bool CommandEventHandler::dirw(std::string path) {
   if (isDir(path) != 0) {
     return false;
   }
@@ -35,7 +35,7 @@ bool dirw(std::string path) {
 
 // TODO exec
 
-std::string hash(std::string path) {
+std::string CommandEventHandler::hash(std::string path) {
   const char *cpath = path.c_str();
   char buffer[BUFSIZE];
 
@@ -47,7 +47,7 @@ std::string hash(std::string path) {
   return getCmdOutput(std::string(buffer));
 }
 
-std::string id() {
+std::string CommandEventHandler::id() {
   std::string interfaces[3] = {"wlan0", "usb0", "lo"};
   FILE *iface;
   char buffer[BUFSIZE];
@@ -67,14 +67,14 @@ std::string id() {
   return std::string("00:00:00:00:00:00");
 }
 
-std::string os() {
+std::string CommandEventHandler::os() {
   // not really supported yet. Best we could do is
   // cat /system/sources.xml | grep gaia and another grep for m-c
   return std::string("B2G");
 }
 
 // need to figure out how to build NSPR for ARM first
-std::string systime() {
+std::string CommandEventHandler::systime() {
   PRTime now = PR_Now();
   PRExplodedTime ts;
   PR_ExplodeTime(now, PR_LocalTimeParameters, &ts);
@@ -87,7 +87,7 @@ std::string systime() {
 }
 
 // need to figure a better way
-std::string uptime() {
+std::string CommandEventHandler::uptime() {
   return getCmdOutput("uptime");
 }
 
@@ -95,11 +95,11 @@ std::string uptime() {
 // TODO rotation
 
 // need to figure a better way
-std::string screen() {
+std::string CommandEventHandler::screen() {
   return readTextFile("/sys/devices/virtual/graphics/fb0/modes");
 }
 
-std::string memory() {
+std::string CommandEventHandler::memory() {
   FILE *meminfo = fopen("/proc/meminfo", "r");
   if (!meminfo) {
     fprintf(stderr, "Error on fopen: /proc/meminfo, with mode r.\n");
@@ -117,7 +117,7 @@ std::string memory() {
   return std::string(buffer);
 }
 
-std::string power() {
+std::string CommandEventHandler::power() {
   std::ostringstream ret;
 
   ret << "Power status:" << std::endl;
@@ -129,7 +129,7 @@ std::string power() {
   return ret.str();
 }
 
-std::string ps() {
+std::string CommandEventHandler::ps() {
   FILE *p = checkPopen("ps | tr -s \" \" | cut -d' ' -f1,2,9 | tail +2", "r");
   std::ostringstream ret;
   char buffer[BUFSIZE];
@@ -141,7 +141,7 @@ std::string ps() {
   return ret.str();
 }
 
-int isDir(std::string path) {
+int CommandEventHandler::isDir(std::string path) {
   // returns 0 if isDir, 1 if exists but not dir, 2 if does not exist
   struct stat statbuf;
   if (stat(path.c_str(), &statbuf) != -1) {
@@ -153,7 +153,7 @@ int isDir(std::string path) {
   return 2;
 }
 
-std::string ls(std::string path) {
+std::string CommandEventHandler::ls(std::string path) {
   struct dirent *dp;
   DIR *dirp = opendir(path.c_str());
   std::ostringstream ret;
@@ -172,7 +172,7 @@ std::string ls(std::string path) {
   return ret.str();
 }
 
-std::string mkdir(std::string path) {
+std::string CommandEventHandler::mkdir(std::string path) {
   char buffer[BUFSIZE];
   sprintf(buffer, "mkdir %s 2>&1", path.c_str());
   FILE *s = checkPopen(std::string(buffer), "r");
@@ -192,7 +192,7 @@ std::string mkdir(std::string path) {
 // TODO quit
 // TODO rebt
 
-bool rm(std::string path) {
+bool CommandEventHandler::rm(std::string path) {
   char buffer[BUFSIZE];
   sprintf(buffer, "rm %s 2>&1", path.c_str());
   FILE *s = checkPopen(std::string(buffer), "r");
@@ -207,7 +207,7 @@ bool rm(std::string path) {
   return false;
 }
 
-bool rmdr(std::string path) {
+bool CommandEventHandler::rmdr(std::string path) {
   char buffer[BUFSIZE];
   sprintf(buffer, "rm -r %s 2>&1", path.c_str());
   FILE *s = checkPopen(std::string(buffer), "r");
@@ -222,6 +222,6 @@ bool rmdr(std::string path) {
   return false;
 }
 
-std::string testroot() {
+std::string CommandEventHandler::testroot() {
   return std::string("/data/local");
 }

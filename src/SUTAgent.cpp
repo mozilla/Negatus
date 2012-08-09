@@ -7,50 +7,52 @@
 #include <iostream>
 
 #include "misc.h"
-#include "commands.h"
+#include "CommandEventHandler.h"
 
 
 // we can use the code in this function to write some tests
 int main(int argc, char **argv) {
 
+  CommandEventHandler cmd;
+
   std::cout << getCmdOutput("uname -s -m -r") << std::endl;
 
-  cd("/data/local");
-  std::cout << cwd() << std::endl;
+  cmd.cd("/data/local");
+  std::cout << cmd.cwd() << std::endl;
 
-  std::cout << clok() << std::endl;
+  std::cout << cmd.clok() << std::endl;
   std::cout << time(NULL) << std::endl;
 
-  std::cout << dirw("/") << std::endl;
-  std::cout << dirw("/data/local") << std::endl;
+  std::cout << cmd.dirw("/") << std::endl;
+  std::cout << cmd.dirw("/data/local") << std::endl;
 
-  std::cout << hash("/init.rc") << std::endl;
-  std::cout << hash("/weird/path") << std::endl;
+  std::cout << cmd.hash("/init.rc") << std::endl;
+  std::cout << cmd.hash("/weird/path") << std::endl;
 
-  std::cout << id() << std::endl;
+  std::cout << cmd.id() << std::endl;
 
-  std::cout << uptime() << std::endl;
+  std::cout << cmd.uptime() << std::endl;
 
-  std::cout << systime() << std::endl;
+  std::cout << cmd.systime() << std::endl;
 
-  std::cout << screen() << std::endl;
+  std::cout << cmd.screen() << std::endl;
 
-  std::cout << power() << std::endl;
+  std::cout << cmd.power() << std::endl;
 
-  std::cout << memory() << std::endl;
+  std::cout << cmd.memory() << std::endl;
 
-  std::cout << ps() << std::endl;
+  std::cout << cmd.ps() << std::endl;
 
-  std::cout << isDir("/data/local") << std::endl;
-  std::cout << isDir("/init.rc") << std::endl;
-  std::cout << isDir("/weird/path") << std::endl;
+  std::cout << cmd.isDir("/data/local") << std::endl;
+  std::cout << cmd.isDir("/init.rc") << std::endl;
+  std::cout << cmd.isDir("/weird/path") << std::endl;
 
-  std::cout << ls("/") << std::endl;
+  std::cout << cmd.ls("/") << std::endl;
 
-  std::cout << mkdir("/data/local/testdir") << std::endl;
-  std::cout << mkdir("/data/local") << std::endl;
+  std::cout << cmd.mkdir("/data/local/testdir") << std::endl;
+  std::cout << cmd.mkdir("/data/local") << std::endl;
 
-  std::cout << rm("/data/something") << std::endl;
+  std::cout << cmd.rm("/data/something") << std::endl;
 
   return 0;
 }
