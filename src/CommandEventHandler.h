@@ -33,6 +33,8 @@ class SessionEventHandler;
 class CommandEventHandler {
 private:
    SessionEventHandler *session; // need to talk about deallocating this!
+
+   std::string actualPath(std::string path);
 public:
 
   CommandEventHandler();
@@ -41,7 +43,7 @@ public:
   std::string cd(std::string path);
   std::string cwd();
   PRUint64 clok();
-  bool dirw(std::string path);
+  std::string dirw(std::string path);
   std::string hash(std::string path);
   std::string id();
   std::string os();
@@ -51,7 +53,7 @@ public:
   std::string memory();
   std::string power();
   std::string ps();
-  int isDir(std::string path);
+  std::string isDir(std::string path);
   std::string ls(std::string path);
   std::string mkdir(std::string path);
   bool rm(std::string path);

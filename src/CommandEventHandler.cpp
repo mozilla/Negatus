@@ -15,30 +15,31 @@ CommandEventHandler::CommandEventHandler(SessionEventHandler *session) {
   this->session = session;
 }
 
-std::string CommandEventHandler::cd(std::string path) {
+std::string CommandEventHandler::actualPath(std::string path) {
   std::string newPath = session->cwd;
   if (path[0] != '/') {
     newPath += path;
   } else {
     newPath = path;
   }
+  return newPath;
+}
+
+std::string CommandEventHandler::cd(std::string path) {
+  std::string newPath = actualPath(path);
   // check if path exists and it is a dir
-  PRFileInfo info;
-  const char *p = newPath.c_str();
-  PRStatus success = PR_GetFileInfo(p, &info);
-  if (success == PR_SUCCESS) {
-    if (info.type == PR_FILE_DIRECTORY) {
-      // check for read permissions
-      success = PR_Access(p, PR_ACCESS_READ_OK);
-      if (success == PR_SUCCESS) {
-        session->cwd = newPath;
-        return std::string("");
-      }
-      return std::string("error: no permissions");
-    }
-    return std::string("error: path is not a directory");
+  std::string ret = isDir(newPath);
+  if (ret.compare("") != 0) {
+    return ret;
   }
-  return std::string("error: invalid path");
+  // check for read permissions
+  PRStatus success = PR_Access(newPath.c_str(), PR_ACCESS_READ_OK);
+  if (success == PR_SUCCESS) {
+    // update the cwd
+    session->cwd = newPath;
+    return std::string("");
+  }
+  return std::string("error: no permissions");
 }
 
 std::string CommandEventHandler::cwd() {
@@ -50,12 +51,17 @@ PRUint64 CommandEventHandler::clok() {
   return (PRUint64) now / PR_USEC_PER_MSEC;
 }
 
-bool CommandEventHandler::dirw(std::string path) {
-  if (isDir(path) != 0) {
-    return false;
+std::string CommandEventHandler::dirw(std::string path) {
+  std::string newPath = actualPath(path);
+  std::string ret = isDir(newPath);
+  if (ret.compare("") != 0) {
+    return ret;
   }
   int success = access(path.c_str(), W_OK);
-  return (success == 0);
+  if (success == 0) {
+    return std::string(path + " is writable");
+  }
+  return std::string(path + " is not writable");
 }
 
 // TODO exec
@@ -166,16 +172,20 @@ std::string CommandEventHandler::ps() {
   return ret.str();
 }
 
-int CommandEventHandler::isDir(std::string path) {
-  // returns 0 if isDir, 1 if exists but not dir, 2 if does not exist
-  struct stat statbuf;
-  if (stat(path.c_str(), &statbuf) != -1) {
-    if (S_ISDIR(statbuf.st_mode)) {
-      return 0;
+std::string CommandEventHandler::isDir(std::string path) {
+  std::string newPath = actualPath(path);
+
+  // check if path exists and it is a dir
+  PRFileInfo info;
+  const char *p = newPath.c_str();
+  PRStatus success = PR_GetFileInfo(p, &info);
+  if (success == PR_SUCCESS) {
+    if (info.type == PR_FILE_DIRECTORY) {
+      return std::string("");
     }
-    return 1;
+    return std::string("error: path is not a directory");
   }
-  return 2;
+  return std::string("error: invalid path");
 }
 
 std::string CommandEventHandler::ls(std::string path) {
