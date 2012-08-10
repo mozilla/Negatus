@@ -16,8 +16,9 @@ CFLAGS := \
   -Llibs\
   -lstdc++ -lnspr4
 FILES := \
-  src/SUTAgent.cpp src/CommandEventHandler.cpp src/misc.cpp\
-  src/SessionEventHandler.cpp
+  src/SUTAgent.cpp src/misc.cpp\
+  src/SessionEventHandler.cpp\
+  src/CommandEventHandler.cpp
 CC=arm-linux-androideabi-g++
 
 agent:

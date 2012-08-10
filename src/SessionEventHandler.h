@@ -7,8 +7,13 @@
 #ifndef __SESSION_EVENT_HANDLER__
 #define __SESSION_EVENT_HANDLER__
 
-class SessionEventHandler {
+#include <string>
 
+class SessionEventHandler {
+public:
+    std::string cwd;
+
+    SessionEventHandler();
 };
 
 #endif

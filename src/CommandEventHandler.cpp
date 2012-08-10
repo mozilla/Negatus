@@ -7,16 +7,39 @@
 #include "CommandEventHandler.h"
 
 
+CommandEventHandler::CommandEventHandler() {
+  session = new SessionEventHandler;
+}
+
+CommandEventHandler::CommandEventHandler(SessionEventHandler *session) {
+  this->session = session;
+}
+
 bool CommandEventHandler::cd(std::string path) {
-  int success = chdir(path.c_str());
-  return (success == 0);
+  std::string newPath = session->cwd;
+  if (path[0] != '/') { // need to make this bit cross platform
+    newPath += path;
+  } else {
+    newPath = path;
+  }
+  // check if path exists and it is a dir
+  PRFileInfo info;
+  const char *p = newPath.c_str();
+  PRStatus success = PR_GetFileInfo(p, &info);
+  if (success == PR_SUCCESS) {
+    if (info.type == PR_FILE_DIRECTORY) {
+      success = PR_Access(p, PR_ACCESS_READ_OK);
+      if (success == PR_SUCCESS) {
+        session->cwd = newPath;
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 std::string CommandEventHandler::cwd() {
-  char output[BUFSIZE];
-  getcwd(output, BUFSIZE);
-
-  return std::string(output);
+  return session->cwd;
 }
 
 uint64_t CommandEventHandler::clok() {

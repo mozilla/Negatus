@@ -20,35 +20,42 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <prio.h>
 #include <prtime.h>
 
 #include "misc.h"
+#include "SessionEventHandler.h"
 
 class SessionEventHandler;
 
+
 class CommandEventHandler {
 private:
-     SessionEventHandler *session;
+   SessionEventHandler *session; // need to talk about deallocating this!
 public:
-    bool cd(std::string path);
-    std::string cwd();
-    uint64_t clok();
-    bool dirw(std::string path);
-    std::string hash(std::string path);
-    std::string id();
-    std::string os();
-    std::string systime();
-    std::string uptime();
-    std::string screen();
-    std::string memory();
-    std::string power();
-    std::string ps();
-    int isDir(std::string path);
-    std::string ls(std::string path);
-    std::string mkdir(std::string path);
-    bool rm(std::string path);
-    bool rmdr(std::string path);
-    std::string testroot();
+
+  CommandEventHandler();
+  CommandEventHandler(SessionEventHandler *session);
+
+  bool cd(std::string path);
+  std::string cwd();
+  uint64_t clok();
+  bool dirw(std::string path);
+  std::string hash(std::string path);
+  std::string id();
+  std::string os();
+  std::string systime();
+  std::string uptime();
+  std::string screen();
+  std::string memory();
+  std::string power();
+  std::string ps();
+  int isDir(std::string path);
+  std::string ls(std::string path);
+  std::string mkdir(std::string path);
+  bool rm(std::string path);
+  bool rmdr(std::string path);
+  std::string testroot();
 };
 
 #endif

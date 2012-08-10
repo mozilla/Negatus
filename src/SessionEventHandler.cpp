@@ -5,3 +5,7 @@
 */
 
 #include "SessionEventHandler.h"
+
+SessionEventHandler::SessionEventHandler() {
+  cwd = std::string("/");
+}
