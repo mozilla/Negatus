@@ -22,6 +22,7 @@
 
 #include <prio.h>
 #include <prtime.h>
+#include <prtypes.h>
 
 #include "misc.h"
 #include "SessionEventHandler.h"
@@ -39,7 +40,7 @@ public:
 
   std::string cd(std::string path);
   std::string cwd();
-  uint64_t clok();
+  PRUint64 clok();
   bool dirw(std::string path);
   std::string hash(std::string path);
   std::string id();

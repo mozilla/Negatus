@@ -45,10 +45,9 @@ std::string CommandEventHandler::cwd() {
   return session->cwd;
 }
 
-uint64_t CommandEventHandler::clok() {
-  struct timespec ts;
-  clock_gettime(CLOCK_REALTIME, &ts);
-  return (uint64_t) ts.tv_sec * 1000 + ts.tv_nsec / 1000000.0;
+PRUint64 CommandEventHandler::clok() {
+  PRTime now = PR_Now();
+  return (PRUint64) now / PR_USEC_PER_MSEC;
 }
 
 bool CommandEventHandler::dirw(std::string path) {
