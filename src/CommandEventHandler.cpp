@@ -17,7 +17,7 @@ CommandEventHandler::CommandEventHandler(SessionEventHandler *session) {
 
 std::string CommandEventHandler::cd(std::string path) {
   std::string newPath = session->cwd;
-  if (path[0] != '/') { // need to make this bit cross platform
+  if (path[0] != '/') {
     newPath += path;
   } else {
     newPath = path;
@@ -28,6 +28,7 @@ std::string CommandEventHandler::cd(std::string path) {
   PRStatus success = PR_GetFileInfo(p, &info);
   if (success == PR_SUCCESS) {
     if (info.type == PR_FILE_DIRECTORY) {
+      // check for read permissions
       success = PR_Access(p, PR_ACCESS_READ_OK);
       if (success == PR_SUCCESS) {
         session->cwd = newPath;
