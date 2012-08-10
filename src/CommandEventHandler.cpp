@@ -15,7 +15,7 @@ CommandEventHandler::CommandEventHandler(SessionEventHandler *session) {
   this->session = session;
 }
 
-bool CommandEventHandler::cd(std::string path) {
+std::string CommandEventHandler::cd(std::string path) {
   std::string newPath = session->cwd;
   if (path[0] != '/') { // need to make this bit cross platform
     newPath += path;
@@ -31,11 +31,13 @@ bool CommandEventHandler::cd(std::string path) {
       success = PR_Access(p, PR_ACCESS_READ_OK);
       if (success == PR_SUCCESS) {
         session->cwd = newPath;
-        return true;
+        return std::string("");
       }
+      return std::string("error: no permissions");
     }
+    return std::string("error: path is not a directory");
   }
-  return false;
+  return std::string("error: invalid path");
 }
 
 std::string CommandEventHandler::cwd() {

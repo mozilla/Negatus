@@ -37,7 +37,7 @@ public:
   CommandEventHandler();
   CommandEventHandler(SessionEventHandler *session);
 
-  bool cd(std::string path);
+  std::string cd(std::string path);
   std::string cwd();
   uint64_t clok();
   bool dirw(std::string path);
