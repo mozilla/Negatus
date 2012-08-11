@@ -223,19 +223,12 @@ std::string CommandEventHandler::mkdir(std::string path) {
 // TODO quit
 // TODO rebt
 
-bool CommandEventHandler::rm(std::string path) {
-  char buffer[BUFSIZE];
-  sprintf(buffer, "rm %s 2>&1", path.c_str());
-  FILE *s = checkPopen(std::string(buffer), "r");
-  std::ostringstream output;
-
-  memset(buffer, 0, BUFSIZE);
-  fgets(buffer, BUFSIZE, s);
-
-  if (strlen(buffer) <= 1) {
-    return true;
+std::string CommandEventHandler::rm(std::string path) {
+  std::string newPath = actualPath(path);
+  if (PR_Delete(newPath.c_str()) == PR_SUCCESS) {
+    return std::string("");
   }
-  return false;
+  return std::string("error: could not delete " + newPath);
 }
 
 bool CommandEventHandler::rmdr(std::string path) {

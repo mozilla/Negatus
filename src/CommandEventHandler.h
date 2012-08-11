@@ -56,7 +56,7 @@ public:
   std::string isDir(std::string path);
   std::string ls(std::string path);
   std::string mkdir(std::string path);
-  bool rm(std::string path);
+  std::string rm(std::string path);
   bool rmdr(std::string path);
   std::string testroot();
 };
