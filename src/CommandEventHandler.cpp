@@ -66,7 +66,8 @@ std::string CommandEventHandler::dirw(std::string path) {
 // TODO exec
 
 std::string CommandEventHandler::hash(std::string path) {
-  const char *cpath = path.c_str();
+  std::string newPath = actualPath(path);
+  const char *cpath = newPath.c_str();
   char buffer[BUFSIZE];
 
   if (PR_Access(cpath, PR_ACCESS_READ_OK) != PR_SUCCESS) {
