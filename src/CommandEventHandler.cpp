@@ -69,7 +69,7 @@ std::string CommandEventHandler::hash(std::string path) {
   const char *cpath = path.c_str();
   char buffer[BUFSIZE];
 
-  if (access(cpath, F_OK | R_OK)) {
+  if (PR_Access(cpath, PR_ACCESS_READ_OK) != PR_SUCCESS) {
     return std::string("");
   }
 
