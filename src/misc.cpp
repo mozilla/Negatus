@@ -58,3 +58,13 @@ int getFirstIntPos(char *str, int limit) {
 
   return -1;
 }
+
+std::string joinPaths(std::string p1, std::string p2) {
+  if (p1[p1.length() - 1] == '/') {
+    p1 = p1.substr(0, p1.length() - 1);
+  }
+  if (p2[0] == '/') {
+    p2 = p2.substr(1);
+  }
+  return p1 + "/" + p2;
+}

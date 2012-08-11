@@ -19,5 +19,6 @@ FILE *checkPopen(std::string cmd, std::string mode);
 std::string getCmdOutput(std::string cmd);
 std::string readTextFile(std::string path);
 int getFirstIntPos(char *str, int limit);
+std::string joinPaths(std::string p1, std::string p2);
 
 #endif

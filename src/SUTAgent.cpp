@@ -54,5 +54,9 @@ int main(int argc, char **argv) {
 
   std::cout << cmd.rm("/data/something") << std::endl;
 
+  std::cout << cmd.ls("/data/local/testdir") << std::endl;
+  std::cout << cmd.rmdr("/data/local/testdir") << std::endl;
+  std::cout << cmd.ls("/data/local/testdir") << std::endl;
+
   return 0;
 }

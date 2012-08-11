@@ -231,19 +231,35 @@ std::string CommandEventHandler::rm(std::string path) {
   return std::string("error: could not delete " + newPath);
 }
 
-bool CommandEventHandler::rmdr(std::string path) {
-  char buffer[BUFSIZE];
-  sprintf(buffer, "rm -r %s 2>&1", path.c_str());
-  FILE *s = checkPopen(std::string(buffer), "r");
-  std::ostringstream output;
+std::string CommandEventHandler::rmdr(std::string path) {
+  std::string newPath = actualPath(path);
+  std::string ret;
+  const char *p = newPath.c_str();
 
-  memset(buffer, 0, BUFSIZE);
-  fgets(buffer, BUFSIZE, s);
-
-  if (strlen(buffer) <= 1) {
-    return true;
+  // if it's a file, nothing special to do
+  if (isDir(newPath).compare("") != 0) {
+    rm(newPath);
+    return std::string("");
   }
-  return false;
+
+  // recurse for dir contents
+  PRDir *dir = PR_OpenDir(p);
+  PRDirEntry *entry = PR_ReadDir(dir, PR_SKIP_BOTH);
+
+  while (entry) {
+    ret = rmdr(joinPaths(newPath, std::string(entry->name)));
+    if (ret.compare("") != 0) {
+      return ret;
+    }
+    entry = PR_ReadDir(dir, PR_SKIP_BOTH);
+  }
+  if (PR_CloseDir(dir) != PR_SUCCESS) {
+    return std::string("error: could not close dir object");
+  }
+  if (PR_RmDir(p) != PR_SUCCESS) {
+    return std::string("error: could not remove " + newPath);
+  }
+  return std::string("");
 }
 
 std::string CommandEventHandler::testroot() {
