@@ -103,7 +103,6 @@ std::string CommandEventHandler::os() {
   return std::string("B2G");
 }
 
-// need to figure out how to build NSPR for ARM first
 std::string CommandEventHandler::systime() {
   PRTime now = PR_Now();
   PRExplodedTime ts;
