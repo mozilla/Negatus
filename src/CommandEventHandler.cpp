@@ -210,18 +210,11 @@ std::string CommandEventHandler::ls(std::string path) {
 }
 
 std::string CommandEventHandler::mkdir(std::string path) {
-  char buffer[BUFSIZE];
-  sprintf(buffer, "mkdir %s 2>&1", path.c_str());
-  FILE *s = checkPopen(std::string(buffer), "r");
-  std::ostringstream output;
-
-  memset(buffer, 0, BUFSIZE);
-  fgets(buffer, BUFSIZE, s);
-
-  if (strlen(buffer) <= 1) {
-    return std::string(path + " successfuly created");
+  std::string newPath = actualPath(path);
+  if (PR_MkDir(newPath.c_str(), 755) != PR_SUCCESS) {
+    return std::string("Could not create directory " + path);
   }
-  return std::string("Could not create directory " + path);
+  return std::string(path + " successfuly created");
 }
 
 // TODO push
