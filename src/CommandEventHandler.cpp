@@ -188,22 +188,24 @@ std::string CommandEventHandler::isDir(std::string path) {
 }
 
 std::string CommandEventHandler::ls(std::string path) {
-  struct dirent *dp;
-  DIR *dirp = opendir(path.c_str());
-  std::ostringstream ret;
+  std::ostringstream out;
+  std::string newPath = actualPath(path);
+  std::string ret = isDir(newPath);
 
-  if (!dirp) {
-    return std::string("");
+  if (ret.compare("") != 0) {
+    return ret;
   }
 
-  dp = readdir(dirp);
-  while (dp) {
-    ret << std::string(dp->d_name) << std::endl;
-    dp = readdir(dirp);
+  PRDir *dir = PR_OpenDir(newPath.c_str());
+  PRDirEntry *entry = PR_ReadDir(dir, PR_SKIP_BOTH);
+
+  while (entry) {
+    out << std::string(entry->name) << std::endl;
+    entry = PR_ReadDir(dir, PR_SKIP_BOTH);
   }
 
-  closedir(dirp);
-  return ret.str();
+  PR_CloseDir(dir);
+  return out.str();
 }
 
 std::string CommandEventHandler::mkdir(std::string path) {
