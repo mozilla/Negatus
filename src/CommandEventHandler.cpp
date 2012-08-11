@@ -57,8 +57,7 @@ std::string CommandEventHandler::dirw(std::string path) {
   if (ret.compare("") != 0) {
     return ret;
   }
-  int success = access(path.c_str(), W_OK);
-  if (success == 0) {
+  if (PR_Access(newPath.c_str(), PR_ACCESS_READ_OK) == PR_SUCCESS) {
     return std::string(path + " is writable");
   }
   return std::string(path + " is not writable");
