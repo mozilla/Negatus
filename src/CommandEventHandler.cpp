@@ -204,7 +204,9 @@ std::string CommandEventHandler::ls(std::string path) {
     entry = PR_ReadDir(dir, PR_SKIP_BOTH);
   }
 
-  PR_CloseDir(dir);
+  if (PR_CloseDir(dir) != PR_SUCCESS) {
+    return std::string("error: could not close dir object");
+  }
   return out.str();
 }
 
