@@ -232,6 +232,12 @@ std::string CommandEventHandler::rm(std::string path) {
 }
 
 std::string CommandEventHandler::rmdr(std::string path) {
+  std::ostringstream out;
+  do_rmdr(path, out);
+  return out.str();
+}
+
+void CommandEventHandler::do_rmdr(std::string path, std::ostringstream &out) {
   std::string newPath = actualPath(path);
   std::string ret;
   const char *p = newPath.c_str();
@@ -239,7 +245,7 @@ std::string CommandEventHandler::rmdr(std::string path) {
   // if it's a file, nothing special to do
   if (isDir(newPath).compare("") != 0) {
     rm(newPath);
-    return std::string("");
+    return;
   }
 
   // recurse for dir contents
@@ -249,17 +255,17 @@ std::string CommandEventHandler::rmdr(std::string path) {
   while (entry) {
     ret = rmdr(joinPaths(newPath, std::string(entry->name)));
     if (ret.compare("") != 0) {
-      return ret;
+      out << ret << "\r\n";
     }
     entry = PR_ReadDir(dir, PR_SKIP_BOTH);
   }
   if (PR_CloseDir(dir) != PR_SUCCESS) {
-    return std::string("error: could not close dir object");
+     out << "error: could not close dir object\r\n";
+     // maybe return;
   }
   if (PR_RmDir(p) != PR_SUCCESS) {
-    return std::string("error: could not remove " + newPath);
+    out << std::string("error: could not remove " + newPath) << "\r\n";
   }
-  return std::string("");
 }
 
 std::string CommandEventHandler::testroot() {

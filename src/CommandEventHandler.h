@@ -35,6 +35,7 @@ private:
    SessionEventHandler *session; // need to talk about deallocating this!
 
    std::string actualPath(std::string path);
+   void do_rmdr(std::string path, std::ostringstream &out);
 public:
 
   CommandEventHandler();
