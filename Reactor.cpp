@@ -94,7 +94,8 @@ Reactor::run()
 void
 Reactor::stop()
 {
-  for (std::vector<EventHandler*>::iterator i = mEvtHandlers.begin(); i != mEvtHandlers.end(); )
+  for (std::vector<EventHandler*>::iterator i = mEvtHandlers.begin();
+       i != mEvtHandlers.end(); )
   {
     (*i)->close();
     delete (*i);

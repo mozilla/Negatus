@@ -57,9 +57,7 @@ BufferedSocket::read(SearchableBuffer& buf, PRUint32 size)
     continue;
     
   if (mReadBufferSize)
-  {
     numRead = copyBuf(buf, mReadBuffer, mReadBufferSize, size);
-  }
 
   return numRead;
 }
