@@ -15,6 +15,8 @@
 #include <unistd.h>
 
 // NSPR
+#include <plgetopt.h>
+#include <prdtoa.h>
 #include <prio.h>
 #include <prnetdb.h>
 #include <prtime.h>
@@ -190,9 +192,44 @@ int main(int argc, char **argv) {
   signal(SIGTERM, &signalHandler);
   signal(SIGINT, &signalHandler);
   signal(SIGHUP, &signalHandler);
+  PRInt16 port = 20701;
+  bool optionError = false;
+  PLOptState* optState = PL_CreateOptState(argc, argv, "p:");
+  while (true)
+  {
+    PLOptStatus status = PL_GetNextOpt(optState);
+    if (status == PL_OPT_BAD)
+    {
+      std::cerr << "Incorrect option(s). Usage: " << argv[0] << " [-p <port>]"
+                << std::endl;
+      optionError = true;
+      break;
+    }
+    else if (status == PL_OPT_OK)
+    {
+      if (optState->option == 'p')
+      {
+        port = PR_strtod(optState->value, NULL);
+        if (port <= 0)
+        {
+          std::cerr << "Invalid port number." << std::endl;
+          optionError = true;
+          break;
+        }
+      }
+    }
+    else if (status == PL_OPT_EOL)
+      break;
+  }
+
+  PL_DestroyOptState(optState);
+
+  if (optionError)
+    return 1;
+  
   SocketAcceptor* acceptor = new SocketAcceptor();
   PRNetAddr acceptorAddr;
-  PR_InitializeNetAddr(PR_IpAddrAny, 20801, &acceptorAddr);
+  PR_InitializeNetAddr(PR_IpAddrAny, port, &acceptorAddr);
   std::cout << "listening on " << addrStr(acceptorAddr) << std::endl;
   acceptor->listen(acceptorAddr);
   Reactor* reactor = Reactor::instance();

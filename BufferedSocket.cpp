@@ -66,25 +66,6 @@ BufferedSocket::read(SearchableBuffer& buf, PRUint32 size)
 
 
 PRUint32
-BufferedSocket::copyBuf(SearchableBuffer& dest, SearchableBuffer& src,
-                        PRUint32& bufferSize, PRUint32 size)
-{
-  PRUint32 sizeWritten = 0;
-  while (bufferSize && sizeWritten < size)
-  {
-    PRUint32 toWrite = (size - sizeWritten) % 1024;
-    if (toWrite > bufferSize)
-      toWrite = bufferSize;
-    src.sgetn(tmpBuf, toWrite);
-    dest.sputn(tmpBuf, toWrite);
-    sizeWritten += toWrite;
-    bufferSize -= toWrite;
-  }
-  return sizeWritten;
-}
-
-
-PRUint32
 BufferedSocket::readUntil(SearchableBuffer& buf, char c)
 {
   while (readIntoBuffer(256) != 0)
@@ -95,6 +76,13 @@ BufferedSocket::readUntil(SearchableBuffer& buf, char c)
   if (c != -1)
     numRead = copyBuf(buf, mReadBuffer, mReadBufferSize, c);
   return numRead;
+}
+
+
+void
+BufferedSocket::write(const char* buf, PRUint32 size)
+{
+  PRInt32 numSent = PR_Send(mSocket, buf, size, 0, PR_INTERVAL_NO_WAIT);
 }
 
 
@@ -123,4 +111,23 @@ BufferedSocket::readIntoBuffer(PRUint32 size)
   }
 
   return numRead;
+}
+
+
+PRUint32
+BufferedSocket::copyBuf(SearchableBuffer& dest, SearchableBuffer& src,
+                        PRUint32& bufferSize, PRUint32 size)
+{
+  PRUint32 sizeWritten = 0;
+  while (bufferSize && sizeWritten < size)
+  {
+    PRUint32 toWrite = (size - sizeWritten) % 1024;
+    if (toWrite > bufferSize)
+      toWrite = bufferSize;
+    src.sgetn(tmpBuf, toWrite);
+    dest.sputn(tmpBuf, toWrite);
+    sizeWritten += toWrite;
+    bufferSize -= toWrite;
+  }
+  return sizeWritten;
 }

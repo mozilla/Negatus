@@ -1,5 +1,6 @@
 SRCS=\
 	BufferedSocket.cpp \
+	CommandEventHandler.cpp \
 	Logging.cpp \
 	Reactor.cpp \
 	SUTAgent.cpp \

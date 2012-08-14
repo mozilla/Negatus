@@ -2,10 +2,11 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
-#ifndef negatus_command_handler_h
-#define negatus_command_handler_h
+#ifndef negatus_session_handler_h
+#define negatus_session_handler_h
 
 #include <prio.h>
+#include <vector>
 #include "BufferedSocket.h"
 #include "EventHandler.h"
 
@@ -21,6 +22,7 @@ public:
   virtual std::string name() { return "SessionEventHandler"; }
 
 private:
+  std::vector<EventHandler*> mEvtHandlerStack;
   BufferedSocket mBufSocket;
 };
 

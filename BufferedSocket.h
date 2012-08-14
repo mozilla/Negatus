@@ -39,7 +39,7 @@ public:
   PRUint32 readUntilNewline(SearchableBuffer& buf)
     { return readUntil(buf, '\n'); }
 
-  void write(PRUint8* buf, PRUint32 size);
+  void write(const char* buf, PRUint32 size);
   void flush();
 
   bool writeBufferEmpty();
@@ -47,10 +47,10 @@ public:
 private:
   PRFileDesc* mSocket;
   SearchableBuffer mReadBuffer;
-  //PRUint8* mReadBuffer;
+  //char* mReadBuffer;
   PRUint32 mReadBufferSize;
   SearchableBuffer mWriteBuffer;
-  //PRUint8* mWriteBuffer;
+  //char* mWriteBuffer;
   //PRUint32 mWriteBufferSize;
   char* tmpBuf;
 
