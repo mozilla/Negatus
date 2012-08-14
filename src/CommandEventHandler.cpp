@@ -125,16 +125,6 @@ std::string CommandEventHandler::exec(std::string cmd) {
     found = strtok_r(NULL, " \t", &r_whitespace);
   }
 
-  // std::cout << "Env vars: " << std::endl;
-  // for (int i = 0; i < env_values.size(); ++i) {
-  //   std::cout << env_names[i] << ": " << env_values[i] << std::endl;
-  // }
-  // std::cout << "Prog: " << prog << std::endl;
-  // std::cout << "Args: " << std::endl;
-  // for (int i = 0; i < args.size(); ++i) {
-  //   std::cout << args[i] << std::endl;
-  // }
-
   // set the env vars and backup the old vals
   std::vector<std::string> backup;
   for (int i = 0; i < env_names.size(); ++i) {
