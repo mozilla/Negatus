@@ -63,7 +63,115 @@ std::string CommandEventHandler::dirw(std::string path) {
   return std::string(path + " is not writable");
 }
 
-// TODO exec
+std::string CommandEventHandler::exec(std::string cmd) {
+  std::vector<char> vcmd;
+  vcmd.assign(cmd.begin(), cmd.end());
+  vcmd.push_back('\0');
+
+  // split by whitespace
+  char *r_whitespace;
+  char *found = strtok_r(&vcmd[0], " \t", &r_whitespace);
+  if (!found) {
+    return std::string("error: invalid cmd");
+  }
+
+  // handle first part separately, check if we have env vars
+  int len = strlen(found);
+  bool envs = false;
+  for (int i = 0; i < len; ++i) {
+    if (found[i] == '=') {
+      envs = true;
+      break;
+    }
+  }
+
+  std::vector<std::string> env_names, env_values;
+  // if we have envs we have to handle them separately
+  if (envs) {
+    char *r_env;
+    char *env = strtok_r(found, ",", &r_env);
+    // now we have something like env1=val1
+    while (env) {
+      int len = strlen(env);
+      int pos = -1;
+      for (int i = 0; i < len; ++i) {
+        if (env[i] == '=') {
+          pos = i;
+          break;
+        }
+      }
+      if (pos == -1) {
+        continue;
+      }
+
+      std::string var(env, pos), val(env + pos + 1);
+      env_names.push_back(var);
+      env_values.push_back(val);
+
+      env = strtok_r(NULL, ",", &r_env);
+    }
+    // skip past the env part
+    found = strtok_r(NULL, " \t", &r_whitespace);
+  }
+
+  // extract the prog
+  std::string prog(found);
+  found = strtok_r(NULL, " \t", &r_whitespace);
+
+  // what remains are the args
+  std::vector<std::string> args;
+  while (found) {
+    args.push_back(std::string(found));
+    found = strtok_r(NULL, " \t", &r_whitespace);
+  }
+
+  // std::cout << "Env vars: " << std::endl;
+  // for (int i = 0; i < env_values.size(); ++i) {
+  //   std::cout << env_names[i] << ": " << env_values[i] << std::endl;
+  // }
+  // std::cout << "Prog: " << prog << std::endl;
+  // std::cout << "Args: " << std::endl;
+  // for (int i = 0; i < args.size(); ++i) {
+  //   std::cout << args[i] << std::endl;
+  // }
+
+  // set the env vars and backup the old vals
+  std::vector<std::string> backup;
+  for (int i = 0; i < env_names.size(); ++i) {
+    const char *name = env_names[i].c_str();
+    char *old = getenv(name);
+    if (!old) {
+      backup.push_back("");
+    } else {
+      backup.push_back(std::string(old));
+    }
+    setenv(name, env_values[i].c_str(), 1);
+  }
+
+  std::ostringstream to_exec;
+  to_exec << prog << " ";
+  for (int i = 0; i < args.size(); ++i) {
+    to_exec << args[i] << " ";
+  }
+
+  FILE *p = checkPopen(to_exec.str(), "r");
+  int status = pclose(p);
+
+  // restore the env
+  for (int i = 0; i < env_names.size(); ++i) {
+    const char *name = env_names[i].c_str();
+    if (backup[i].size() == 0) {
+      unsetenv(name);
+    } else {
+      setenv(name, backup[i].c_str(), 1);
+    }
+  }
+
+  if (status == 0) {
+    return std::string("success");
+  }
+  return std::string("error");
+}
 
 std::string CommandEventHandler::hash(std::string path) {
   std::string newPath = actualPath(path);

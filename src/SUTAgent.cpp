@@ -58,5 +58,7 @@ int main(int argc, char **argv) {
   std::cout << cmd.rmdr("/data/local/testdir") << std::endl;
   std::cout << cmd.ls("/data/local/testdir") << std::endl;
 
+  std::cout << cmd.exec("touch /data/local/exec") << std::endl;
+
   return 0;
 }

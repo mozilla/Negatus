@@ -7,8 +7,10 @@
 #ifndef __COMMAND_EVENT_HANDLER__
 #define __COMMAND_EVENT_HANDLER__
 
+#include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
 
 #include <dirent.h>
 #include <stdint.h>
@@ -21,6 +23,7 @@
 #include <unistd.h>
 
 #include <prio.h>
+#include <prproces.h>
 #include <prtime.h>
 #include <prtypes.h>
 
@@ -45,6 +48,7 @@ public:
   std::string cwd();
   PRUint64 clok();
   std::string dirw(std::string path);
+  std::string exec(std::string cmd);
   std::string hash(std::string path);
   std::string id();
   std::string os();
