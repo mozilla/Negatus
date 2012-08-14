@@ -1,0 +1,13 @@
+CXX=g++
+# Not entirely sure why we can't use ld directly...
+#LD=ld
+LD:=$(CXX)
+
+CPPFLAGS=\
+        -g \
+	-fpermissive \
+	$(shell nspr-config --cflags)
+
+LDLIBS=$(shell nspr-config --libs) -lrt
+
+include Makefile

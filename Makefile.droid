@@ -1,0 +1,20 @@
+CXX=arm-linux-androideabi-g++
+# Not entirely sure why we can't use ld directly...
+#LD=arm-linux-androideabi-ld
+LD:=$(CXX)
+
+CPPFLAGS=\
+	-fpermissive \
+	--sysroot=$(TOOLCH)/sysroot \
+	-I$(TOOLCH)/lib/gcc/arm-linux-androideabi/4.6.x-google/include \
+	-I$(TOOLCH)/lib/gcc/arm-linux-androideabi/4.6.x-google/include-fixed \
+	-I$(TOOLCH)/arm-linux-androideabi/include/c++/4.6 \
+	-I$(TOOLCH)/arm-linux-androideabi/include/c++/4.6/arm-linux-androideabi \
+	-I$(TOOLCH)/sysroot/usr/include \
+	$(shell nspr-config --cflags)
+
+LDFLAGS=-L$(TOOLCH)/arm-linux-androideabi/lib -L$(TOOLCH)/sysroot/usr/lib
+
+LDLIBS=-Lnspr -lstdc++ -lnspr4
+
+include Makefile

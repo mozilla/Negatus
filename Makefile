@@ -1,18 +1,20 @@
-# CFLAGS := \
-#   -fPIC -mandroid -DANDROID \
-#   -DOS_ANDROID -fno-short-enums -fno-exceptions -lstdc++
-CFLAGS := \
-  --sysroot=$(TOOLCH)/sysroot\
-  -I$(TOOLCH)/lib/gcc/arm-linux-androideabi/4.6.x-google/include\
-  -I$(TOOLCH)/lib/gcc/arm-linux-androideabi/4.6.x-google/include-fixed\
-  -I$(TOOLCH)/arm-linux-androideabi/include/c++/4.6\
-  -I$(TOOLCH)/arm-linux-androideabi/include/c++/4.6/arm-linux-androideabi\
-  -I$(TOOLCH)/sysroot/usr/include \
-  -I/usr/include/nspr \
-  -L. \
-  -lstdc++ -lnspr4
-FILES := SUTAgent.cpp
-CC=arm-linux-androideabi-g++
+SRCS=\
+	BufferedSocket.cpp \
+	Logging.cpp \
+	Reactor.cpp \
+	SUTAgent.cpp \
+	SessionEventHandler.cpp \
+	SocketAcceptor.cpp
 
-agent:
-	$(CC) $(CFLAGS) $(FILES) -o agent
+OBJS=$(subst .cpp,.o,$(SRCS))
+
+all: agent
+
+agent: $(OBJS)
+	$(LD) -o agent $(OBJS) $(LDFLAGS) $(LDLIBS) 
+
+%.o: %.c 
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+
+clean:
+	rm -f *.o agent

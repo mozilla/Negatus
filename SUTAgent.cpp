@@ -1,8 +1,7 @@
-/*
- This Source Code Form is subject to the terms of the Mozilla Public
- License, v. 2.0. If a copy of the MPL was not distributed with this file,
- You can obtain one at http://mozilla.org/MPL/2.0/.
-*/
+/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // C++
 #include <iostream>
@@ -16,9 +15,27 @@
 #include <unistd.h>
 
 // NSPR
+#include <prio.h>
+#include <prnetdb.h>
 #include <prtime.h>
 
+#include "Logging.h"
+#include "Reactor.h"
+#include "SocketAcceptor.h"
+
 #define BUFSIZE 1024
+
+bool wantToDie = false;
+
+
+// FIXME: This is not portable!
+#include <signal.h>
+
+void signalHandler(int signal)
+{
+  std::cout << "signal caught!" << std::endl;
+  wantToDie = true;
+}
 
 
 FILE *checkPopen(std::string cmd, std::string mode) {
@@ -147,7 +164,7 @@ std::string screen() {
 }
 
 int main(int argc, char **argv) {
-
+/*
   std::cout << getCmdOutput("uname -s -m -r") << std::endl;
 
   cd("/data/local");
@@ -169,6 +186,18 @@ int main(int argc, char **argv) {
   std::cout << systime() << std::endl;
 
   std::cout << screen() << std::endl;
-
+*/
+  signal(SIGTERM, &signalHandler);
+  signal(SIGINT, &signalHandler);
+  signal(SIGHUP, &signalHandler);
+  SocketAcceptor* acceptor = new SocketAcceptor();
+  PRNetAddr acceptorAddr;
+  PR_InitializeNetAddr(PR_IpAddrAny, 20801, &acceptorAddr);
+  std::cout << "listening on " << addrStr(acceptorAddr) << std::endl;
+  acceptor->listen(acceptorAddr);
+  Reactor* reactor = Reactor::instance();
+  while (!wantToDie)
+    reactor->run();
+  reactor->stop();
   return 0;
 }
