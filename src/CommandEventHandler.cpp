@@ -31,9 +31,12 @@ CommandEventHandler::CommandLine::CommandLine(std::string line)
     return;
   cmd = cmdc;
   char* argc = strtok(NULL, " ");
-  if (!argc)
-    return;
-  arg = argc;
+  while (argc) {
+    arg += argc;
+    arg += " ";
+    argc = strtok(NULL, " ");
+  }
+  arg = trim(arg);
 }
 
 
