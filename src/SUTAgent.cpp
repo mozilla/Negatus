@@ -1,64 +1,81 @@
-/*
- This Source Code Form is subject to the terms of the Mozilla Public
- License, v. 2.0. If a copy of the MPL was not distributed with this file,
- You can obtain one at http://mozilla.org/MPL/2.0/.
-*/
+/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include <iostream>
 
-#include "misc.h"
-#include "CommandEventHandler.h"
+#include <plgetopt.h>
+#include <prdtoa.h>
+#include <prio.h>
+#include <prnetdb.h>
+#include <prtime.h>
+
+#include "Logging.h"
+#include "Reactor.h"
+#include "SocketAcceptor.h"
+
+
+// FIXME: This is not portable!
+#include <signal.h>
+
+bool wantToDie = false;
+
+void signalHandler(int signal)
+{
+  wantToDie = true;
+}
 
 
 // we can use the code in this function to write some tests
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
+  signal(SIGTERM, &signalHandler);
+  signal(SIGINT, &signalHandler);
+  signal(SIGHUP, &signalHandler);
+  PRInt16 port = 20701;
+  bool optionError = false;
+  PLOptState* optState = PL_CreateOptState(argc, argv, "p:");
+  while (true)
+  {
+    PLOptStatus status = PL_GetNextOpt(optState);
+    if (status == PL_OPT_BAD)
+    {
+      std::cerr << "Incorrect option(s). Usage: " << argv[0] << " [-p <port>]"
+                << std::endl;
+      optionError = true;
+      break;
+    }
+    else if (status == PL_OPT_OK)
+    {
+      if (optState->option == 'p')
+      {
+        port = PR_strtod(optState->value, NULL);
+        if (port <= 0)
+        {
+          std::cerr << "Invalid port number." << std::endl;
+          optionError = true;
+          break;
+        }
+      }
+    }
+    else if (status == PL_OPT_EOL)
+      break;
+  }
 
-  CommandEventHandler cmd;
+  PL_DestroyOptState(optState);
 
-  std::cout << getCmdOutput("uname -s -m -r") << std::endl;
-
-  cmd.cd("/data/local");
-  std::cout << cmd.cwd() << std::endl;
-
-  std::cout << cmd.clok() << std::endl;
-  std::cout << time(NULL) << std::endl;
-
-  std::cout << cmd.dirw("/") << std::endl;
-  std::cout << cmd.dirw("/data/local") << std::endl;
-
-  std::cout << cmd.hash("/init.rc") << std::endl;
-  std::cout << cmd.hash("/weird/path") << std::endl;
-
-  std::cout << cmd.id() << std::endl;
-
-  std::cout << cmd.uptime() << std::endl;
-
-  std::cout << cmd.systime() << std::endl;
-
-  std::cout << cmd.screen() << std::endl;
-
-  std::cout << cmd.power() << std::endl;
-
-  std::cout << cmd.memory() << std::endl;
-
-  std::cout << cmd.ps() << std::endl;
-
-  std::cout << cmd.isDir("/data/local") << std::endl;
-  std::cout << cmd.isDir("/init.rc") << std::endl;
-  std::cout << cmd.isDir("/weird/path") << std::endl;
-
-  std::cout << cmd.ls("/") << std::endl;
-
-  std::cout << cmd.mkdir("/data/local/testdir") << std::endl;
-  std::cout << cmd.mkdir("/data/local") << std::endl;
-
-  std::cout << cmd.rm("/data/something") << std::endl;
-
-  std::cout << cmd.ls("/data/local/testdir") << std::endl;
-  std::cout << cmd.rmdr("/data/local/testdir") << std::endl;
-  std::cout << cmd.ls("/data/local/testdir") << std::endl;
-
-  std::cout << cmd.exec("touch /data/local/exec") << std::endl;
-
+  if (optionError)
+    return 1;
+  
+  SocketAcceptor* acceptor = new SocketAcceptor();
+  PRNetAddr acceptorAddr;
+  PR_InitializeNetAddr(PR_IpAddrAny, port, &acceptorAddr);
+  std::cout << "listening on " << addrStr(acceptorAddr) << std::endl;
+  acceptor->listen(acceptorAddr);
+  Reactor* reactor = Reactor::instance();
+  while (!wantToDie)
+    reactor->run();
+  reactor->stop();
   return 0;
 }
