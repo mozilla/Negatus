@@ -194,13 +194,13 @@ CommandEventHandler::readTextFile(std::string path)
   }
 
   char buffer[BUFSIZE];
-  std::string output;
+  std::ostringstream output;
 
   while (fgets(buffer, BUFSIZE, fp))
-    output += std::string(buffer);
+    output << std::string(buffer);
 
   fclose(fp);
-  return output;
+  return output.str();
 }
 
 
