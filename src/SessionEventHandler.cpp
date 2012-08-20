@@ -7,7 +7,7 @@
 #include "Reactor.h"
 
 SessionEventHandler::SessionEventHandler(PRFileDesc* socket)
-  : cwd("/"), mBufSocket(socket)
+  : mBufSocket(socket)
 {
   EventHandler* cmdEventHandler = new CommandEventHandler(mBufSocket, *this);
   mEvtHandlerStack.push_back(cmdEventHandler);

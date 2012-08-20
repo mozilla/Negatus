@@ -41,7 +41,6 @@ private:
 
   void sendPrompt();
   std::string agentWarn(std::string errStr);
-  std::string actualPath(std::string path);
   void do_rmdr(std::string path, std::ostringstream &out);
 
   FILE *checkPopen(std::string cmd, std::string mode);

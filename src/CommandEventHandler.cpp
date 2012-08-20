@@ -152,18 +152,6 @@ CommandEventHandler::agentWarn(std::string errStr)
 }
 
 
-std::string
-CommandEventHandler::actualPath(std::string path)
-{
-  std::string newPath = mSession.cwd;
-  if (path[0] != '/')
-    newPath += path;
-  else
-    newPath = path;
-  return newPath;
-}
-
-
 FILE*
 CommandEventHandler::checkPopen(std::string cmd, std::string mode)
 {
@@ -243,19 +231,23 @@ CommandEventHandler::joinPaths(std::string p1, std::string p2)
 std::string
 CommandEventHandler::cd(std::string path)
 {
-  std::string newPath = actualPath(path);
+  if (path.compare("") == 0)
+    path = "/";
+  const char *p = path.c_str();
+
   // check if path exists and it is a dir
-  std::string ret = isDir(newPath);
+  std::string ret = isDir(path);
   if (ret.compare("") != 0)
     return ret;
 
   // check for read permissions
-  PRStatus success = PR_Access(newPath.c_str(), PR_ACCESS_READ_OK);
+  PRStatus success = PR_Access(p, PR_ACCESS_READ_OK);
   if (success == PR_SUCCESS)
   {
     // update the cwd
-    mSession.cwd = newPath;
-    return cwd();
+    int s = chdir(p);
+    if (s == 0)
+      return cwd();
   }
   return agentWarn("no permissions");
 }
@@ -264,7 +256,9 @@ CommandEventHandler::cd(std::string path)
 std::string
 CommandEventHandler::cwd()
 {
-  return mSession.cwd + ENDL;
+  char buffer[BUFSIZE];
+  getcwd(buffer, BUFSIZE);
+  return std::string(buffer) + ENDL;
 }
 
 
@@ -279,11 +273,10 @@ CommandEventHandler::clok()
 std::string
 CommandEventHandler::dirw(std::string path)
 {
-  std::string newPath = actualPath(path);
-  std::string ret = isDir(newPath);
+  std::string ret = isDir(path);
   if (ret.compare("") != 0)
     return ret;
-  if (PR_Access(newPath.c_str(), PR_ACCESS_WRITE_OK) == PR_SUCCESS)
+  if (PR_Access(path.c_str(), PR_ACCESS_WRITE_OK) == PR_SUCCESS)
     return std::string(path + " is writable" + ENDL);
   return std::string(path + " is not writable" + ENDL);
 }
@@ -389,7 +382,7 @@ CommandEventHandler::exec(std::string cmd)
   }
 
   if (status == 0)
-    return std::string("success");
+    return std::string("success") + ENDL;
   return agentWarn("error");
 }
 
@@ -397,8 +390,7 @@ CommandEventHandler::exec(std::string cmd)
 std::string
 CommandEventHandler::hash(std::string path)
 {
-  std::string newPath = actualPath(path);
-  const char *cpath = newPath.c_str();
+  const char *cpath = path.c_str();
   char buffer[BUFSIZE];
 
   if (PR_Access(cpath, PR_ACCESS_READ_OK) != PR_SUCCESS)
@@ -529,11 +521,9 @@ CommandEventHandler::ps()
 std::string
 CommandEventHandler::isDir(std::string path)
 {
-  std::string newPath = actualPath(path);
-
   // check if path exists and it is a dir
   PRFileInfo info;
-  const char *p = newPath.c_str();
+  const char *p = path.c_str();
   PRStatus success = PR_GetFileInfo(p, &info);
   if (success == PR_SUCCESS)
   {
@@ -548,14 +538,15 @@ CommandEventHandler::isDir(std::string path)
 std::string
 CommandEventHandler::ls(std::string path)
 {
+  if (path.compare("") == 0)
+    path = ".";
   std::ostringstream out;
-  std::string newPath = actualPath(path);
-  std::string ret = isDir(newPath);
+  std::string ret = isDir(path);
 
   if (ret.compare("") != 0)
     return ret;
 
-  PRDir *dir = PR_OpenDir(newPath.c_str());
+  PRDir *dir = PR_OpenDir(path.c_str());
   PRDirEntry *entry = PR_ReadDir(dir, PR_SKIP_BOTH);
 
   while (entry)
@@ -574,8 +565,7 @@ CommandEventHandler::ls(std::string path)
 std::string
 CommandEventHandler::mkdir(std::string path)
 {
-  std::string newPath = actualPath(path);
-  if (PR_MkDir(newPath.c_str(), 755) != PR_SUCCESS)
+  if (PR_MkDir(path.c_str(), 755) != PR_SUCCESS)
     return std::string("Could not create directory " + path);
   return std::string(path + " successfuly created");
 }
@@ -597,10 +587,9 @@ CommandEventHandler::quit()
 std::string
 CommandEventHandler::rm(std::string path)
 {
-  std::string newPath = actualPath(path);
-  if (PR_Delete(newPath.c_str()) == PR_SUCCESS)
+  if (PR_Delete(path.c_str()) == PR_SUCCESS)
     return std::string("");
-  return std::string("error: could not delete " + newPath);
+  return std::string("error: could not delete " + path);
 }
 
 
@@ -616,14 +605,13 @@ CommandEventHandler::rmdr(std::string path)
 void
 CommandEventHandler::do_rmdr(std::string path, std::ostringstream &out)
 {
-  std::string newPath = actualPath(path);
   std::string ret;
-  const char *p = newPath.c_str();
+  const char *p = path.c_str();
 
   // if it's a file, nothing special to do
-  if (isDir(newPath).compare("") != 0)
+  if (isDir(path).compare("") != 0)
   {
-    rm(newPath);
+    rm(path);
     return;
   }
 
@@ -633,7 +621,7 @@ CommandEventHandler::do_rmdr(std::string path, std::ostringstream &out)
 
   while (entry)
   {
-    ret = rmdr(joinPaths(newPath, std::string(entry->name)));
+    ret = rmdr(joinPaths(path, std::string(entry->name)));
     if (ret.compare("") != 0)
       out << ret << ENDL;
     entry = PR_ReadDir(dir, PR_SKIP_BOTH);
@@ -644,7 +632,7 @@ CommandEventHandler::do_rmdr(std::string path, std::ostringstream &out)
      // maybe return;
   }
   if (PR_RmDir(p) != PR_SUCCESS)
-    out << std::string("error: could not remove " + newPath) << ENDL;
+    out << std::string("error: could not remove " + path) << ENDL;
 }
 
 

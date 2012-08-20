@@ -21,8 +21,6 @@ public:
   virtual void handleEvent(PRPollDesc handle);
   virtual std::string name() { return "SessionEventHandler"; }
 
-  std::string cwd;
-
 private:
   std::vector<EventHandler*> mEvtHandlerStack;
   BufferedSocket mBufSocket;
