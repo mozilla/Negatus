@@ -27,7 +27,6 @@ void signalHandler(int signal)
 }
 
 
-// we can use the code in this function to write some tests
 int main(int argc, char **argv)
 {
   signal(SIGTERM, &signalHandler);
