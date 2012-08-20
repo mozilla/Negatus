@@ -369,6 +369,14 @@ CommandEventHandler::exec(std::string cmd)
     to_exec << args[i] << " ";
 
   FILE *p = checkPopen(to_exec.str(), "r");
+
+  // get the output so pclose won't cry even on successful calls
+  char buffer[BUFSIZE];
+  std::ostringstream output;
+
+  while (fgets(buffer, BUFSIZE, p))
+    output << std::string(buffer);
+
   int status = pclose(p);
 
   // restore the env
