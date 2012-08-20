@@ -15,6 +15,6 @@ CPPFLAGS=\
 
 LDFLAGS=-L$(TOOLCH)/arm-linux-androideabi/lib -L$(TOOLCH)/sysroot/usr/lib
 
-LDLIBS=-Lnspr -lstdc++ -lplds4 -lplc4 -ldl -lnspr4
+LDLIBS=-Llibs -lstdc++ -lplds4 -lplc4 -ldl -lnspr4
 
 include Makefile
