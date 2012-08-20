@@ -574,8 +574,8 @@ std::string
 CommandEventHandler::mkdir(std::string path)
 {
   if (PR_MkDir(path.c_str(), 755) != PR_SUCCESS)
-    return std::string("Could not create directory " + path);
-  return std::string(path + " successfuly created");
+    return std::string("Could not create directory " + path) + ENDL;
+  return std::string(path + " successfuly created") + ENDL;
 }
 
 
