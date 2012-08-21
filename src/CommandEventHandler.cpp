@@ -89,7 +89,9 @@ CommandEventHandler::handleLine(std::string line)
   if (cl.cmd.empty())
     return;
   std::string result(agentWarn("unknown command"));
-  if (cl.cmd.compare("cd") == 0)
+  if (cl.cmd.compare("cat") == 0)
+    result = cat(cl.args);
+  else if (cl.cmd.compare("cd") == 0)
     result = cd(cl.args);
   else if (cl.cmd.compare("cwd") == 0)
     result = cwd(cl.args);
@@ -216,6 +218,19 @@ CommandEventHandler::joinPaths(std::string p1, std::string p2)
   if (p2[0] == '/')
     p2 = p2.substr(1);
   return p1 + "/" + p2;
+}
+
+
+std::string
+CommandEventHandler::cat(std::vector<std::string>& args)
+{
+  std::string path(args.size() ? args[0] : "");
+  if (path.compare("") == 0)
+    return agentWarn("cat needs an argument");
+  if (isDir(path).compare("") == 0)
+    return agentWarn("cannot cat a dir");
+
+  return readTextFile(path);
 }
 
 

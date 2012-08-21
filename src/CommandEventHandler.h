@@ -48,6 +48,7 @@ private:
   std::string joinPaths(std::string p1, std::string p2);
 
   // Command implementations
+  std::string cat(std::vector<std::string>& args);
   std::string cd(std::vector<std::string>& args);
   std::string clok(std::vector<std::string>& args);
   std::string cwd(std::vector<std::string>& args);
