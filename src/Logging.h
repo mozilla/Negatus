@@ -5,9 +5,10 @@
 #ifndef negatus_logging_h
 #define negatus_logging_h
 
+#include <prtypes.h>
 #include <string>
-#include <prio.h>
 
-std::string addrStr(PRNetAddr addr);
+std::string agentWarn(std::string errStr);
+std::string agentWarnInvalidNumArgs(PRIntn numReqArgs);
 
 #endif

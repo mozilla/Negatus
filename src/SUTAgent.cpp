@@ -11,7 +11,7 @@
 #include <prnetdb.h>
 #include <prtime.h>
 
-#include "Logging.h"
+#include "Strings.h"
 #include "Reactor.h"
 #include "SocketAcceptor.h"
 

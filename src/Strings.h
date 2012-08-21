@@ -5,13 +5,18 @@
 #ifndef negatus_strings_h
 #define negatus_strings_h
 
+#include <prio.h>
 #include <prtypes.h>
 #include <string>
+
+#define ENDL "\r\n"
 
 std::string
 trim(std::string s);
 
 std::string
 itoa(PRUint64 i);
+
+std::string addrStr(PRNetAddr addr);
 
 #endif

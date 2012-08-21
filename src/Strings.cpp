@@ -3,6 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 #include "Strings.h"
+#include <prnetdb.h>
+#include <sstream>
 
 std::string
 trim(std::string s)
@@ -35,4 +37,17 @@ itoa(PRUint64 i)
     tmp /= 10;
   }
   return std::string(s);
+}
+
+
+std::string
+addrStr(PRNetAddr addr)
+{
+  std::stringstream ss;
+  char s[32];
+  PR_NetAddrToString(&addr, s, 32);
+  ss << s;
+  if (addr.inet.port)
+    ss << ":" << PR_ntohs(addr.inet.port);
+  return ss.str();
 }

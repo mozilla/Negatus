@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <string.h>
 
-BlockBuffer::Block::Block(unsigned int size)
+BlockBuffer::Block::Block(PRUint32 size)
   : mSize(size), mData(new char[size])
 {
 }
@@ -19,7 +19,7 @@ BlockBuffer::Block::~Block()
 
 
 int
-BlockBuffer::Block::get(char* out, unsigned int start, unsigned int size)
+BlockBuffer::Block::get(char* out, PRUint32 start, PRUint32 size)
 {
   assert(start + size <= mSize);
   memcpy(out, &mData[start], size);
@@ -28,7 +28,7 @@ BlockBuffer::Block::get(char* out, unsigned int start, unsigned int size)
 
 
 int
-BlockBuffer::Block::put(const char* in, unsigned int start, unsigned int size)
+BlockBuffer::Block::put(const char* in, PRUint32 start, PRUint32 size)
 {
   assert(start + size <= mSize);
   memcpy(mData + start, in, size);
@@ -37,7 +37,7 @@ BlockBuffer::Block::put(const char* in, unsigned int start, unsigned int size)
 
 
 int
-BlockBuffer::Block::find(char c, unsigned int start, unsigned int end)
+BlockBuffer::Block::find(char c, PRUint32 start, PRUint32 end)
 {
   for (int i = start; i < end; i++)
   {
@@ -49,14 +49,14 @@ BlockBuffer::Block::find(char c, unsigned int start, unsigned int end)
 
 
 void
-BlockBuffer::Block::shrink(unsigned int newSize)
+BlockBuffer::Block::shrink(PRUint32 newSize)
 {
   assert(newSize <= mSize);
   mSize = newSize;
 }
 
 
-BlockBuffer::BlockBuffer(unsigned int defaultBlockSize)
+BlockBuffer::BlockBuffer(PRUint32 defaultBlockSize)
   : mDefaultBlockSize(defaultBlockSize)
 {
   newBlock(mDefaultBlockSize);
@@ -64,17 +64,17 @@ BlockBuffer::BlockBuffer(unsigned int defaultBlockSize)
 
  
 int
-BlockBuffer::get(char* out, unsigned int size)
+BlockBuffer::get(char* out, PRUint32 size)
 {
-  unsigned int totalGotten = 0;
+  PRUint32 totalGotten = 0;
   Block* blockp;
   while (totalGotten < size && mGetPtr != mPutPtr)
   {
     blockp = mBlocks[mGetPtr.block];
-    unsigned int toGet = size - totalGotten;
+    PRUint32 toGet = size - totalGotten;
     if (toGet > blockp->size() - mGetPtr.elem)
       toGet = blockp->size() - mGetPtr.elem;
-    unsigned int gotten = blockp->get(&out[totalGotten], mGetPtr.elem, toGet);
+    PRUint32 gotten = blockp->get(&out[totalGotten], mGetPtr.elem, toGet);
     mGetPtr.elem += gotten;
     totalGotten += gotten;
     updateBufferStart();
@@ -84,17 +84,17 @@ BlockBuffer::get(char* out, unsigned int size)
 
 
 int
-BlockBuffer::put(const char* in, unsigned int size)
+BlockBuffer::put(const char* in, PRUint32 size)
 {
-  unsigned int totalWritten = 0;
+  PRUint32 totalWritten = 0;
   Block* blockp;
   while (totalWritten < size)
   {
     blockp = mBlocks[mPutPtr.block];
-    unsigned int toWrite = blockp->size() - mPutPtr.elem;
+    PRUint32 toWrite = blockp->size() - mPutPtr.elem;
     if (toWrite > size - totalWritten)
       toWrite = size - totalWritten;
-    unsigned int written = blockp->put(&in[totalWritten], mPutPtr.elem, toWrite);
+    PRUint32 written = blockp->put(&in[totalWritten], mPutPtr.elem, toWrite);
     totalWritten += written;
     mPutPtr.elem += written;
     updateBufferEnd();
@@ -134,13 +134,13 @@ BlockBuffer::updateBufferStart()
 int
 BlockBuffer::find(char c)
 {
-  unsigned int block = mGetPtr.block;
-  unsigned int len = 0;
+  PRUint32 block = mGetPtr.block;
+  PRUint32 len = 0;
   while (block < mBlocks.size())
   {
-    unsigned int start = block == mGetPtr.block ? mGetPtr.elem : 0;
-    unsigned int end = block == mPutPtr.block ? mPutPtr.elem : mBlocks[block]->size();
-    unsigned int nl = mBlocks[block]->find('\n', start, end);
+    PRUint32 start = block == mGetPtr.block ? mGetPtr.elem : 0;
+    PRUint32 end = block == mPutPtr.block ? mPutPtr.elem : mBlocks[block]->size();
+    PRUint32 nl = mBlocks[block]->find('\n', start, end);
     if (nl == -1)
     {
       len += end - start;
@@ -160,7 +160,7 @@ int
 BlockBuffer::getline(std::stringstream& out)
 {
   // FIXME: This does a double copy. We should be able to make a
-  // BlockBuffer::Block::get(std::stringstream& out, unsigned int size)
+  // BlockBuffer::Block::get(std::stringstream& out, PRUint32 size)
   // function to get around this.
   int len = find('\n');
   if (len == -1)
@@ -174,7 +174,7 @@ BlockBuffer::getline(std::stringstream& out)
 
 
 int
-BlockBuffer::getline(char* out, unsigned int size)
+BlockBuffer::getline(char* out, PRUint32 size)
 {
   int len = find('\n');
   if (len == -1)
@@ -187,7 +187,7 @@ BlockBuffer::getline(char* out, unsigned int size)
 
 
 void
-BlockBuffer::newBlock(unsigned int size)
+BlockBuffer::newBlock(PRUint32 size)
 {
   Block* b = new Block(size);
   mBlocks.push_back(b);
@@ -197,7 +197,7 @@ BlockBuffer::newBlock(unsigned int size)
 
 
 char*
-BlockBuffer::allocBlock(unsigned int size)
+BlockBuffer::allocBlock(PRUint32 size)
 {
   mBlocks[mPutPtr.block]->shrink(mPutPtr.elem);
   newBlock(size);
@@ -206,14 +206,14 @@ BlockBuffer::allocBlock(unsigned int size)
 
 
 void
-BlockBuffer::advancePutPtr(unsigned int amount)
+BlockBuffer::advancePutPtr(PRUint32 amount)
 {
-  unsigned int totalAdvanced = 0;
+  PRUint32 totalAdvanced = 0;
   Block* blockp;
   while (totalAdvanced < amount)
   {
     blockp = mBlocks[mPutPtr.block];
-    unsigned int toAdvance = blockp->size() - mPutPtr.elem;
+    PRUint32 toAdvance = blockp->size() - mPutPtr.elem;
     if (toAdvance > amount - totalAdvanced)
       toAdvance = amount - totalAdvanced;
     totalAdvanced += toAdvance;
@@ -223,15 +223,15 @@ BlockBuffer::advancePutPtr(unsigned int amount)
 }
 
 
-unsigned int
+PRUint32
 BlockBuffer::avail()
 {
-  unsigned int avail = 0;
-  unsigned int block = mGetPtr.block;
+  PRUint32 avail = 0;
+  PRUint32 block = mGetPtr.block;
   while (block <= mPutPtr.block)
   {
-    unsigned int start = block == mGetPtr.block ? mGetPtr.elem : 0;
-    unsigned int end = block == mPutPtr.block ? mPutPtr.elem :
+    PRUint32 start = block == mGetPtr.block ? mGetPtr.elem : 0;
+    PRUint32 end = block == mPutPtr.block ? mPutPtr.elem :
       mBlocks[block]->size();
     avail += end - start;
     block++;
