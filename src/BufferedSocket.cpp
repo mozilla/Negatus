@@ -92,4 +92,3 @@ BufferedSocket::readIntoBuffer(PRUint32 size)
 
   return numRead;
 }
-

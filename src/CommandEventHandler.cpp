@@ -4,6 +4,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 #include "CommandEventHandler.h"
 #include "BufferedSocket.h"
+#include "Logging.h"
 #include "SessionEventHandler.h"
 #include "Strings.h"
 
@@ -22,21 +23,17 @@
 #include <prtypes.h>
 
 CommandEventHandler::CommandLine::CommandLine(std::string line)
-  : cmd(""), arg("")
+  : cmd("")
 {
   char linec[line.size()];
   strcpy(linec, line.c_str());
-  char* cmdc = strtok(linec, " ");
+  char* cmdc = strtok(linec, " \t");
   if (!cmdc)
     return;
   cmd = cmdc;
-  char* argc = strtok(NULL, " ");
-  while (argc) {
-    arg += argc;
-    arg += " ";
-    argc = strtok(NULL, " ");
-  }
-  arg = trim(arg);
+  char* argc;
+  while ((argc = strtok(NULL, " \t")))
+    args.push_back(trim(argc));
 }
 
 
@@ -68,7 +65,7 @@ CommandEventHandler::handleEvent(PRPollDesc desc)
     return;
   if (!(desc.out_flags & PR_POLL_READ))
     return;
-  
+
   while (true)
   {
     std::stringstream buf;
@@ -77,7 +74,8 @@ CommandEventHandler::handleEvent(PRPollDesc desc)
       break;
     std::string line(trim(buf.str()));
     handleLine(line);
-    sendPrompt();
+    if (!closed())
+      sendPrompt();
   }
   if (mBufSocket.closed())
     close();
@@ -92,47 +90,47 @@ CommandEventHandler::handleLine(std::string line)
     return;
   std::string result(agentWarn("unknown command"));
   if (cl.cmd.compare("cd") == 0)
-    result = cd(cl.arg);
+    result = cd(cl.args);
   else if (cl.cmd.compare("cwd") == 0)
-    result = cwd();
+    result = cwd(cl.args);
   else if (cl.cmd.compare("clok") == 0)
-    result = clok();
+    result = clok(cl.args);
   else if (cl.cmd.compare("dirw") == 0)
-    result = dirw(cl.arg);
+    result = dirw(cl.args);
   else if (cl.cmd.compare("exec") == 0)
-    result = exec(cl.arg);
+    result = exec(cl.args);
   else if (cl.cmd.compare("hash") == 0)
-    result = hash(cl.arg);
+    result = hash(cl.args);
   else if (cl.cmd.compare("id") == 0)
-    result = id();
+    result = id(cl.args);
   else if (cl.cmd.compare("os") == 0)
-    result = os();
+    result = os(cl.args);
   else if (cl.cmd.compare("systime") == 0)
-    result = systime();
+    result = systime(cl.args);
   else if (cl.cmd.compare("uptime") == 0)
-    result = uptime();
+    result = uptime(cl.args);
   else if (cl.cmd.compare("screen") == 0)
-    result = screen();
+    result = screen(cl.args);
   else if (cl.cmd.compare("memory") == 0)
-    result = memory();
+    result = memory(cl.args);
   else if (cl.cmd.compare("power") == 0)
-    result = power();
+    result = power(cl.args);
   else if (cl.cmd.compare("ps") == 0)
-    result = ps();
+    result = ps(cl.args);
   else if (cl.cmd.compare("isDir") == 0)
-    result = isDir(cl.arg);
+    result = isDir(cl.args);
   else if (cl.cmd.compare("ls") == 0)
-    result = ls(cl.arg);
+    result = ls(cl.args);
   else if (cl.cmd.compare("mkdir") == 0)
-    result = mkdir(cl.arg);
+    result = mkdir(cl.args);
   else if (cl.cmd.compare("quit") == 0)
-    result = quit();
+    result = quit(cl.args);
   else if (cl.cmd.compare("rm") == 0)
-    result = rm(cl.arg);
+    result = rm(cl.args);
   else if (cl.cmd.compare("rmdr") == 0)
-    result = rmdr(cl.arg);
+    result = rmdr(cl.args);
   else if (cl.cmd.compare("testroot") == 0)
-    result = testroot();
+    result = testroot(cl.args);
   if (!result.empty())
     mBufSocket.write(result);
 }
@@ -142,13 +140,6 @@ void
 CommandEventHandler::sendPrompt()
 {
   mBufSocket.write(mPrompt.c_str(), mPrompt.size());
-}
-
-
-std::string
-CommandEventHandler::agentWarn(std::string errStr)
-{
-  return "### AGENT-WARNING: " + errStr + ENDL;
 }
 
 
@@ -229,8 +220,9 @@ CommandEventHandler::joinPaths(std::string p1, std::string p2)
 
 
 std::string
-CommandEventHandler::cd(std::string path)
+CommandEventHandler::cd(std::vector<std::string>& args)
 {
+  std::string path(args.size() ? args[0] : "");
   if (path.compare("") == 0)
     path = "/";
   const char *p = path.c_str();
@@ -247,14 +239,14 @@ CommandEventHandler::cd(std::string path)
     // update the cwd
     int s = chdir(p);
     if (s == 0)
-      return cwd();
+      return cwd(args);
   }
   return agentWarn("no permissions");
 }
 
 
 std::string
-CommandEventHandler::cwd()
+CommandEventHandler::cwd(std::vector<std::string>& args)
 {
   char buffer[BUFSIZE];
   getcwd(buffer, BUFSIZE);
@@ -263,7 +255,7 @@ CommandEventHandler::cwd()
 
 
 std::string
-CommandEventHandler::clok()
+CommandEventHandler::clok(std::vector<std::string>& args)
 {
   PRUint64 now = PR_Now() / PR_USEC_PER_SEC;
   return itoa(now) + ENDL;
@@ -271,8 +263,9 @@ CommandEventHandler::clok()
 
 
 std::string
-CommandEventHandler::dirw(std::string path)
+CommandEventHandler::dirw(std::vector<std::string>& args)
 {
+  std::string path(args.size() ? args[0] : "");
   std::string ret = isDir(path);
   if (ret.compare("") != 0)
     return ret;
@@ -283,36 +276,24 @@ CommandEventHandler::dirw(std::string path)
 
 
 std::string
-CommandEventHandler::exec(std::string cmd)
+CommandEventHandler::exec(std::vector<std::string>& args)
 {
-  std::vector<char> vcmd;
-  vcmd.assign(cmd.begin(), cmd.end());
-  vcmd.push_back('\0');
+  if (args.size() < 1)
+    return agentWarn("command not specified");
 
-  // split by whitespace
-  char *r_whitespace;
-  char *found = strtok_r(&vcmd[0], " \t", &r_whitespace);
-  if (!found)
-    return agentWarn("invalid cmd");
+  std::vector<std::string>::iterator argi = args.begin();
 
   // handle first part separately, check if we have env vars
-  int len = strlen(found);
-  bool envs = false;
-  for (int i = 0; i < len; ++i)
-  {
-    if (found[i] == '=')
-    {
-      envs = true;
-      break;
-    }
-  }
+  bool envs = args[0].find('=') != std::string::npos;
 
   std::vector<std::string> env_names, env_values;
   // if we have envs we have to handle them separately
   if (envs)
   {
+    char envVarStr[(*argi).size() + 1];
+    (*argi).copy(envVarStr, (*argi).size());
     char *r_env;
-    char *env = strtok_r(found, ",", &r_env);
+    char *env = strtok_r(envVarStr, ",", &r_env);
     // now we have something like env1=val1
     while (env) {
       int len = strlen(env);
@@ -335,20 +316,13 @@ CommandEventHandler::exec(std::string cmd)
       env = strtok_r(NULL, ",", &r_env);
     }
     // skip past the env part
-    found = strtok_r(NULL, " \t", &r_whitespace);
+    argi++;
   }
 
   // extract the prog
-  std::string prog(found);
-  found = strtok_r(NULL, " \t", &r_whitespace);
+  std::string prog(*argi++);
 
   // what remains are the args
-  std::vector<std::string> args;
-  while (found)
-  {
-    args.push_back(std::string(found));
-    found = strtok_r(NULL, " \t", &r_whitespace);
-  }
 
   // set the env vars and backup the old vals
   std::vector<std::string> backup;
@@ -365,8 +339,8 @@ CommandEventHandler::exec(std::string cmd)
 
   std::ostringstream to_exec;
   to_exec << prog << " ";
-  for (int i = 0; i < args.size(); ++i)
-    to_exec << args[i] << " ";
+  for (; argi != args.end(); ++argi)
+    to_exec << *argi << " ";
 
   FILE *p = checkPopen(to_exec.str(), "r");
 
@@ -396,9 +370,11 @@ CommandEventHandler::exec(std::string cmd)
 
 
 std::string
-CommandEventHandler::hash(std::string path)
+CommandEventHandler::hash(std::vector<std::string>& args)
 {
-  const char *cpath = path.c_str();
+  if (args.size() < 1)
+    return agentWarnInvalidNumArgs(1);
+  const char *cpath = args[0].c_str();
   char buffer[BUFSIZE];
 
   if (PR_Access(cpath, PR_ACCESS_READ_OK) != PR_SUCCESS)
@@ -410,7 +386,7 @@ CommandEventHandler::hash(std::string path)
 
 
 std::string
-CommandEventHandler::id()
+CommandEventHandler::id(std::vector<std::string>& args)
 {
   std::string interfaces[3] = {"wlan0", "usb0", "lo"};
   FILE *iface;
@@ -433,7 +409,7 @@ CommandEventHandler::id()
 
 
 std::string
-CommandEventHandler::os()
+CommandEventHandler::os(std::vector<std::string>& args)
 {
   // not really supported yet. Best we could do is
   // cat /system/sources.xml | grep gaia and another grep for m-c
@@ -442,7 +418,7 @@ CommandEventHandler::os()
 
 
 std::string
-CommandEventHandler::systime()
+CommandEventHandler::systime(std::vector<std::string>& args)
 {
   PRTime now = PR_Now();
   PRExplodedTime ts;
@@ -458,7 +434,7 @@ CommandEventHandler::systime()
 
 // need to figure a better way
 std::string
-CommandEventHandler::uptime()
+CommandEventHandler::uptime(std::vector<std::string>& args)
 {
   return getCmdOutput("uptime");
 }
@@ -469,14 +445,14 @@ CommandEventHandler::uptime()
 
 // need to figure a better way
 std::string
-CommandEventHandler::screen()
+CommandEventHandler::screen(std::vector<std::string>& args)
 {
   return readTextFile("/sys/devices/virtual/graphics/fb0/modes");
 }
 
 
 std::string
-CommandEventHandler::memory()
+CommandEventHandler::memory(std::vector<std::string>& args)
 {
   FILE *meminfo = fopen("/proc/meminfo", "r");
   if (!meminfo)
@@ -498,7 +474,7 @@ CommandEventHandler::memory()
 
 
 std::string
-CommandEventHandler::power()
+CommandEventHandler::power(std::vector<std::string>& args)
 {
   std::ostringstream ret;
 
@@ -513,7 +489,7 @@ CommandEventHandler::power()
 
 
 std::string
-CommandEventHandler::ps()
+CommandEventHandler::ps(std::vector<std::string>& args)
 {
   FILE *p = checkPopen("ps | tr -s \" \" | cut -d' ' -f1,2,9 | tail +2", "r");
   std::ostringstream ret;
@@ -523,6 +499,15 @@ CommandEventHandler::ps()
     ret << buffer;
 
   return ret.str();
+}
+
+
+std::string
+CommandEventHandler::isDir(std::vector<std::string>& args)
+{
+  if (args.size() < 1)
+    return agentWarnInvalidNumArgs(1);
+  return isDir(args[0]);
 }
 
 
@@ -544,8 +529,9 @@ CommandEventHandler::isDir(std::string path)
 
 
 std::string
-CommandEventHandler::ls(std::string path)
+CommandEventHandler::ls(std::vector<std::string>& args)
 {
+  std::string path(args.size() ? args[0] : "");
   if (path.compare("") == 0)
     path = ".";
   std::ostringstream out;
@@ -571,8 +557,11 @@ CommandEventHandler::ls(std::string path)
 
 
 std::string
-CommandEventHandler::mkdir(std::string path)
+CommandEventHandler::mkdir(std::vector<std::string>& args)
 {
+  if (args.size() < 1)
+    return agentWarnInvalidNumArgs(1);
+  std::string path = args[0];
   if (PR_MkDir(path.c_str(), 755) != PR_SUCCESS)
     return std::string("Could not create directory " + path) + ENDL;
   return std::string(path + " successfuly created") + ENDL;
@@ -581,14 +570,22 @@ CommandEventHandler::mkdir(std::string path)
 
 // TODO push
 // TODO pull
-// TODO quit
 // TODO rebt
 
 std::string
-CommandEventHandler::quit()
+CommandEventHandler::quit(std::vector<std::string>& args)
 {
-  mBufSocket.close();
+  close();
   return "";
+}
+
+
+std::string
+CommandEventHandler::rm(std::vector<std::string>& args)
+{
+  if (args.size() < 1)
+    return agentWarnInvalidNumArgs(1);
+  rm(args[0]);
 }
 
 
@@ -602,8 +599,11 @@ CommandEventHandler::rm(std::string path)
 
 
 std::string
-CommandEventHandler::rmdr(std::string path)
+CommandEventHandler::rmdr(std::vector<std::string>& args)
 {
+  if (args.size() < 1)
+    return agentWarnInvalidNumArgs(1);
+  std::string path = args[0];
   std::ostringstream out;
   do_rmdr(path, out);
   return out.str();
@@ -629,15 +629,13 @@ CommandEventHandler::do_rmdr(std::string path, std::ostringstream &out)
 
   while (entry)
   {
-    ret = rmdr(joinPaths(path, std::string(entry->name)));
-    if (ret.compare("") != 0)
-      out << ret << ENDL;
+    do_rmdr(joinPaths(path, std::string(entry->name)), out);
     entry = PR_ReadDir(dir, PR_SKIP_BOTH);
   }
   if (PR_CloseDir(dir) != PR_SUCCESS)
   {
-     out << "error: could not close dir object\r\n";
-     // maybe return;
+    out << "error: could not close dir object" << ENDL;
+    // maybe return;
   }
   if (PR_RmDir(p) != PR_SUCCESS)
     out << std::string("error: could not remove " + path) << ENDL;
@@ -645,7 +643,7 @@ CommandEventHandler::do_rmdr(std::string path, std::ostringstream &out)
 
 
 std::string
-CommandEventHandler::testroot()
+CommandEventHandler::testroot(std::vector<std::string>& args)
 {
   return std::string("/data/local");
 }

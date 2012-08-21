@@ -5,6 +5,7 @@
 #ifndef negatus_buffer_h
 #define negatus_buffer_h
 
+#include <prtypes.h>
 #include <sstream>
 #include <vector>
 
@@ -13,60 +14,60 @@
 class BlockBuffer
 {
 public:
-  BlockBuffer(unsigned int defaultBlockSize=DEFAULT_BLOCK_SIZE);
+  BlockBuffer(PRUint32 defaultBlockSize=DEFAULT_BLOCK_SIZE);
 
-  int get(char* out, unsigned int size);
-  int put(const char* in, unsigned int size);
+  int get(char* out, PRUint32 size);
+  int put(const char* in, PRUint32 size);
   /* Only writes to 'out' if a whole line is found.
      If 'size' is less than the length of the line
      plus one (for the null char), returns -1. */
-  int getline(char* out, unsigned int size);
+  int getline(char* out, PRUint32 size);
   int getline(std::stringstream& out);
   int find(char c);
 
-  char* allocBlock(unsigned int size);
-  void advancePutPtr(unsigned int amount);
+  char* allocBlock(PRUint32 size);
+  void advancePutPtr(PRUint32 amount);
 
-  unsigned int avail();
+  PRUint32 avail();
 
 private:
   class Block
   {
   public:
-    Block(unsigned int size=DEFAULT_BLOCK_SIZE);
+    Block(PRUint32 size=DEFAULT_BLOCK_SIZE);
     ~Block();
 
-    int get(char* out, unsigned int start, unsigned int size);
-    int put(const char* in, unsigned int start, unsigned int size);
-    int find(char c, unsigned int start, unsigned int end);
+    int get(char* out, PRUint32 start, PRUint32 size);
+    int put(const char* in, PRUint32 start, PRUint32 size);
+    int find(char c, PRUint32 start, PRUint32 end);
 
-    unsigned int size() { return mSize; }
+    PRUint32 size() { return mSize; }
 
     /* Resizes the buffer. Does not actuallyd deallocate any memory;
        rather, it just makes the block look smaller. This is needed if
        a new block of a defined size needs to be added to the buffer. */
-    void shrink(unsigned int newSize);
+    void shrink(PRUint32 newSize);
 
-    char* data(unsigned int start=0) { return mData + start; }
+    char* data(PRUint32 start=0) { return mData + start; }
 
   private:
-    unsigned int mSize;
+    PRUint32 mSize;
     char* mData;
   };
 
   struct BlockPtr
   {
     BlockPtr() : block(0), elem(0) {}
-    unsigned int block;
-    unsigned int elem;
+    PRUint32 block;
+    PRUint32 elem;
 
     bool operator!=(BlockPtr& other)
     { return block != other.block || elem != other.elem; }
   };
 
-  void newBlock(unsigned int size);
+  void newBlock(PRUint32 size);
 
-  unsigned int mDefaultBlockSize;
+  PRUint32 mDefaultBlockSize;
   std::vector<Block*> mBlocks;
   BlockPtr mGetPtr;
   BlockPtr mPutPtr;
