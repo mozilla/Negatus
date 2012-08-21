@@ -151,7 +151,7 @@ CommandEventHandler::checkPopen(std::string cmd, std::string mode)
   {
     fprintf(stderr, "Error on popen: %s, with mode %s.\n", cmd.c_str(),
             mode.c_str());
-    return agentWarn("Error on popen.");
+    exit(1);
   }
   return fp;
 }
