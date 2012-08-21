@@ -55,7 +55,7 @@ BufferedSocket::readLine(std::stringstream& buf)
 void
 BufferedSocket::write(const char* buf, PRUint32 size)
 {
-  PRInt32 numSent = PR_Send(mSocket, buf, size, 0, PR_INTERVAL_NO_WAIT);
+  PR_Send(mSocket, buf, size, 0, PR_INTERVAL_NO_WAIT);
 }
 
 

@@ -25,7 +25,7 @@
 CommandEventHandler::CommandLine::CommandLine(std::string line)
   : cmd("")
 {
-  char linec[line.size()];
+  char linec[line.size()+1];
   strcpy(linec, line.c_str());
   char* cmdc = strtok(linec, " \t");
   if (!cmdc)
@@ -585,7 +585,7 @@ CommandEventHandler::rm(std::vector<std::string>& args)
 {
   if (args.size() < 1)
     return agentWarnInvalidNumArgs(1);
-  rm(args[0]);
+  return rm(args[0]);
 }
 
 
