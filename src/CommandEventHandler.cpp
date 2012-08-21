@@ -151,7 +151,7 @@ CommandEventHandler::checkPopen(std::string cmd, std::string mode)
   {
     fprintf(stderr, "Error on popen: %s, with mode %s.\n", cmd.c_str(),
             mode.c_str());
-    exit(1);
+    return agentWarn("Error on popen.");
   }
   return fp;
 }
@@ -181,7 +181,7 @@ CommandEventHandler::readTextFile(std::string path)
   if (!fp)
   {
     fprintf(stderr, "Error on fopen: %s, with mode r.\n", cpath);
-    exit(1);
+    return agentWarn("Cannot open file");
   }
 
   char buffer[BUFSIZE];
@@ -457,8 +457,7 @@ CommandEventHandler::memory(std::vector<std::string>& args)
   FILE *meminfo = fopen("/proc/meminfo", "r");
   if (!meminfo)
   {
-    fprintf(stderr, "Error on fopen: /proc/meminfo, with mode r.\n");
-    exit(1);
+    return agentWarn("Error on fopen: /proc/meminfo, with mode r");
   }
 
   unsigned int total, available;
