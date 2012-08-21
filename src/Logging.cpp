@@ -3,19 +3,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 #include "Logging.h"
-#include <prnetdb.h>
-#include <sstream>
-
-#include <iostream>
+#include "Strings.h"
 
 std::string
-addrStr(PRNetAddr addr)
+agentWarn(std::string errStr)
 {
-  std::stringstream ss;
-  char s[32];
-  PR_NetAddrToString(&addr, s, 32);
-  ss << s;
-  if (addr.inet.port)
-    ss << ":" << PR_ntohs(addr.inet.port);
-  return ss.str();
+  return "### AGENT-WARNING: " + errStr + ENDL;
+}
+
+
+std::string
+agentWarnInvalidNumArgs(PRIntn numReqArgs)
+{
+  std::string errStr("Invalid number of args: ");
+  errStr += itoa(numReqArgs);
+  errStr += " args required";
+  return agentWarn(errStr);
 }

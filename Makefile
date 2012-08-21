@@ -18,9 +18,9 @@ OBJS=$(subst .cpp,.o,$(SRCS))
 all: agent
 
 agent: $(OBJS)
-	$(LD) -o agent $(OBJS) $(LDFLAGS) $(LDLIBS) 
+	$(LD) -o agent $(OBJS) $(LDFLAGS) $(LDLIBS)
 
-%.o: %.c 
+%.o: %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
 clean:

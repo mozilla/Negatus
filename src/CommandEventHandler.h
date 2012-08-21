@@ -10,7 +10,6 @@
 #include "EventHandler.h"
 
 #define BUFSIZE 1024
-#define ENDL "\r\n"
 
 class BufferedSocket;
 class SessionEventHandler;
@@ -21,8 +20,8 @@ public:
   CommandEventHandler(BufferedSocket& bufSocket,
                       SessionEventHandler& session);
 
-  virtual void getPollDescs(std::vector<PRPollDesc>& desc);
-  virtual void handleEvent(PRPollDesc handle);
+  virtual void getPollDescs(std::vector<PRPollDesc>& descs);
+  virtual void handleEvent(PRPollDesc desc);
   virtual std::string name() { return "CommandEventHandler"; }
 
   void handleLine(std::string line);
@@ -32,7 +31,7 @@ private:
   {
     CommandLine(std::string line);
     std::string cmd;
-    std::string arg;
+    std::vector<std::string> args;
   };
 
   BufferedSocket& mBufSocket;
@@ -40,7 +39,6 @@ private:
   std::string mPrompt;
 
   void sendPrompt();
-  std::string agentWarn(std::string errStr);
   void do_rmdr(std::string path, std::ostringstream &out);
 
   FILE *checkPopen(std::string cmd, std::string mode);
@@ -50,27 +48,29 @@ private:
   std::string joinPaths(std::string p1, std::string p2);
 
   // Command implementations
-  std::string cd(std::string path);
-  std::string clok();
-  std::string cwd();
-  std::string dirw(std::string path);
-  std::string exec(std::string cmd);
-  std::string hash(std::string path);
-  std::string id();
+  std::string cd(std::vector<std::string>& args);
+  std::string clok(std::vector<std::string>& args);
+  std::string cwd(std::vector<std::string>& args);
+  std::string dirw(std::vector<std::string>& args);
+  std::string exec(std::vector<std::string>& args);
+  std::string hash(std::vector<std::string>& args);
+  std::string id(std::vector<std::string>& args);
+  std::string isDir(std::vector<std::string>& args);
   std::string isDir(std::string path);
-  std::string ls(std::string path);
-  std::string memory();
-  std::string mkdir(std::string path);
-  std::string os();
-  std::string power();
-  std::string ps();
-  std::string quit();
-  std::string screen();
-  std::string systime();
+  std::string ls(std::vector<std::string>& args);
+  std::string memory(std::vector<std::string>& args);
+  std::string mkdir(std::vector<std::string>& args);
+  std::string os(std::vector<std::string>& args);
+  std::string power(std::vector<std::string>& args);
+  std::string ps(std::vector<std::string>& args);
+  std::string quit(std::vector<std::string>& args);
+  std::string screen(std::vector<std::string>& args);
+  std::string systime(std::vector<std::string>& args);
+  std::string rm(std::vector<std::string>& args);
   std::string rm(std::string path);
-  std::string rmdr(std::string path);
-  std::string testroot();
-  std::string uptime();
+  std::string rmdr(std::vector<std::string>& args);
+  std::string testroot(std::vector<std::string>& args);
+  std::string uptime(std::vector<std::string>& args);
 };
 
 #endif
