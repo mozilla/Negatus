@@ -13,6 +13,7 @@
 class EventHandler {
 public:
   EventHandler() : mClosed(false) {}
+  virtual ~EventHandler() {}
 
   virtual void close() { mClosed = true; }
   bool closed() { return mClosed; }
