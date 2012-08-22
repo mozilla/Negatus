@@ -27,3 +27,9 @@ You need to:
 # Building, running
 
 Just *./run.sh*.
+
+# Including this in B2G
+
+Just clone this repo inside $B2G/system/. Build and flash B2G as usual
+and then you will be able to run the agent using `sutagent`. It will be
+in the $PATH.
