@@ -13,10 +13,11 @@ LOCAL_SRC_FILES:= \
 	src/SUTAgent.cpp
 
 LOCAL_SHARED_LIBRARIES:= libnspr4 libplc4 libplds4
+LOCAL_C_INCLUDES:= $(shell nspr-config --includedir)
 
 LOCAL_MODULE_TAGS:= eng
 
-LOCAL_MODULE:= agent
+LOCAL_MODULE:= sutagent
 LOCAL_MODULE_PATH:= $(TARGET_OUT_OPTIONAL_EXECUTABLES)
 include $(BUILD_EXECUTABLE)
 
