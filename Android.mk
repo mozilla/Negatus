@@ -12,7 +12,8 @@ LOCAL_SRC_FILES:= \
 	src/Strings.cpp \
 	src/SUTAgent.cpp
 
-LOCAL_LDFLAGS += -Llibs/ -lplds4 -lplc4 -ldl -lnspr4
+#LOCAL_LDFLAGS += -L/Users/mbalaur/localCode/Mozilla/phoneB2G/system/sutagent/libs -lplds4 -lplc4 -ldl -lnspr4
+LOCAL_LDFLAGS += -L$(LOCAL_PATH)/libs -lplds4 -lplc4 -ldl -lnspr4
 LOCAL_SHARED_LIBRARIES := libstlport #libnspr4 libplc4-prebuilt libplds4-prebuilt
 LOCAL_C_INCLUDES:= \
        $(shell nspr-config --includedir) \
