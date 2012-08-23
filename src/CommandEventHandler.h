@@ -10,8 +10,6 @@
 #include "BufferedSocket.h"
 #include "EventHandler.h"
 
-#define BUFSIZE 1024
-
 class CommandEventHandler: public EventHandler
 {
 public:
@@ -39,8 +37,6 @@ private:
   void sendPrompt();
   void do_rmdr(std::string path, std::ostringstream &out);
 
-  FILE *checkPopen(std::string cmd, std::string mode);
-  std::string getCmdOutput(std::string cmd);
   std::string readTextFile(std::string path);
   int getFirstIntPos(char *str, int limit);
   std::string joinPaths(std::string p1, std::string p2);
@@ -64,6 +60,7 @@ private:
   std::string power(std::vector<std::string>& args);
   std::string ps(std::vector<std::string>& args);
   std::string pull(std::vector<std::string>& args);
+  std::string push(std::vector<std::string>& args);
   std::string quit(std::vector<std::string>& args);
   std::string screen(std::vector<std::string>& args);
   std::string systime(std::vector<std::string>& args);

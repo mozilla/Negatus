@@ -6,12 +6,15 @@ SRCS=\
 	src/Buffer.cpp \
 	src/BufferedSocket.cpp \
 	src/CommandEventHandler.cpp \
+	src/Hash.cpp \
 	src/Logging.cpp \
 	src/PullFileEventHandler.cpp \
+	src/PushFileEventHandler.cpp \
 	src/Reactor.cpp \
 	src/SocketAcceptor.cpp \
 	src/Strings.cpp \
-	src/SUTAgent.cpp
+	src/SUTAgent.cpp \
+	src/Subprocess.cpp
 
 OBJS=$(subst .cpp,.o,$(SRCS))
 

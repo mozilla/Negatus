@@ -3,9 +3,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 #include "CommandEventHandler.h"
+#include "Hash.h"
 #include "Logging.h"
 #include "PullFileEventHandler.h"
+#include "PushFileEventHandler.h"
 #include "Strings.h"
+#include "Subprocess.h"
 
 #include <dirent.h>
 #include <stdint.h>
@@ -162,6 +165,8 @@ CommandEventHandler::handleLine(std::string line)
     result = ps(cl.args);
   else if (cl.cmd.compare("pull") == 0)
     result = pull(cl.args);
+  else if (cl.cmd.compare("push") == 0)
+    result = push(cl.args);
   else if (cl.cmd.compare("isDir") == 0)
     result = isDir(cl.args);
   else if (cl.cmd.compare("ls") == 0)
@@ -185,35 +190,6 @@ void
 CommandEventHandler::sendPrompt()
 {
   mBufSocket.write(mPrompt.c_str(), mPrompt.size());
-}
-
-
-FILE*
-CommandEventHandler::checkPopen(std::string cmd, std::string mode)
-{
-  FILE *fp = popen(cmd.c_str(), mode.c_str());
-  if (!fp)
-  {
-    fprintf(stderr, "Error on popen: %s, with mode %s.\n", cmd.c_str(),
-            mode.c_str());
-    exit(1);
-  }
-  return fp;
-}
-
-
-std::string
-CommandEventHandler::getCmdOutput(std::string cmd)
-{
-  FILE *fp = checkPopen(cmd, "r");
-  char buffer[BUFSIZE];
-  std::string output;
-
-  while (fgets(buffer, BUFSIZE, fp))
-    output += std::string(buffer);
-
-  pclose(fp);
-  return output;
 }
 
 
@@ -433,14 +409,12 @@ CommandEventHandler::hash(std::vector<std::string>& args)
 {
   if (args.size() < 1)
     return agentWarnInvalidNumArgs(1);
-  const char *cpath = args[0].c_str();
-  char buffer[BUFSIZE];
+  std::string path = args[0];
 
-  if (PR_Access(cpath, PR_ACCESS_READ_OK) != PR_SUCCESS)
-    return std::string("");
+  if (PR_Access(path.c_str(), PR_ACCESS_READ_OK) != PR_SUCCESS)
+    return std::string(agentWarn("cannot open file for reading"));
 
-  sprintf(buffer, "md5sum %s", cpath);
-  return getCmdOutput(std::string(buffer));
+  return fileHash(path) + std::string(ENDL);
 }
 
 
@@ -569,6 +543,18 @@ CommandEventHandler::pull(std::vector<std::string>& args)
   PRUint64 start = args.size() < 2 ? 0 : PR_strtod(args[1].c_str(), NULL);
   PRUint64 size = args.size() < 3 ? 0 : PR_strtod(args[2].c_str(), NULL);
   mDataEventHandler = new PullFileEventHandler(mBufSocket, path, start, size);
+  return "";
+}
+
+
+std::string
+CommandEventHandler::push(std::vector<std::string>& args)
+{
+  if (args.size() < 2)
+    return agentWarnInvalidNumArgs(2);
+  std::string path(args[0]);
+  PRUint64 size = PR_strtod(args[1].c_str(), NULL);
+  mDataEventHandler = new PushFileEventHandler(mBufSocket, path, size);
   return "";
 }
 
