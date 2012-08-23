@@ -7,6 +7,7 @@
 
 #include <plgetopt.h>
 #include <prdtoa.h>
+#include <prerror.h>
 #include <prio.h>
 #include <prnetdb.h>
 #include <prtime.h>
@@ -71,7 +72,12 @@ int main(int argc, char **argv)
   PRNetAddr acceptorAddr;
   PR_InitializeNetAddr(PR_IpAddrAny, port, &acceptorAddr);
   std::cout << "listening on " << addrStr(acceptorAddr) << std::endl;
-  acceptor->listen(acceptorAddr);
+  PRStatus status = acceptor->listen(acceptorAddr);
+  if (status == PR_FAILURE)
+  {
+    std::cerr << "Failure to open socket: " << PR_GetError() << std::endl;
+    return 1;
+  }
   Reactor* reactor = Reactor::instance();
   while (!wantToDie)
     reactor->run();

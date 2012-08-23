@@ -3,12 +3,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 #include "CommandEventHandler.h"
-#include "BufferedSocket.h"
 #include "Logging.h"
-#include "SessionEventHandler.h"
+#include "PullFileEventHandler.h"
 #include "Strings.h"
 
-#include <iostream>
 #include <dirent.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -19,6 +17,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <prdtoa.h>
 #include <prproces.h>
 #include <prtypes.h>
 
@@ -37,11 +36,18 @@ CommandEventHandler::CommandLine::CommandLine(std::string line)
 }
 
 
-CommandEventHandler::CommandEventHandler(BufferedSocket& bufSocket,
-                                         SessionEventHandler& session)
-  : mBufSocket(bufSocket), mSession(session), mPrompt("$>")
+CommandEventHandler::CommandEventHandler(PRFileDesc* socket)
+  : mBufSocket(socket), mDataEventHandler(NULL), mPrompt("$>")
 {
   sendPrompt();
+}
+
+
+void
+CommandEventHandler::close()
+{
+  mBufSocket.close();
+  EventHandler::close();
 }
 
 
@@ -50,23 +56,49 @@ CommandEventHandler::getPollDescs(std::vector<PRPollDesc>& descs)
 {
   if (!mBufSocket.closed())
   {
-    PRPollDesc desc;
-    desc.fd = mBufSocket.fd();
-    desc.in_flags = PR_POLL_READ;
-    descs.push_back(desc);
+    if (mDataEventHandler)
+      mDataEventHandler->getPollDescs(descs);
+    else
+    {
+      PRPollDesc desc;
+      desc.fd = mBufSocket.fd();
+      desc.in_flags = PR_POLL_READ;
+      descs.push_back(desc);
+    }
   }
+}
+
+
+void
+CommandEventHandler::checkDataEventHandler(PRPollDesc desc)
+{
+  if (!closed() && mDataEventHandler)
+  {
+    if (!mDataEventHandler->closed())
+      mDataEventHandler->handleEvent(desc);
+    if (mDataEventHandler->closed())
+    {
+      delete mDataEventHandler;
+      mDataEventHandler = NULL;
+      sendPrompt();
+    }
+    else
+      return;
+  }  
 }
 
 
 void
 CommandEventHandler::handleEvent(PRPollDesc desc)
 {
+  checkDataEventHandler(desc);
+
   if (desc.fd != mBufSocket.fd())
     return;
   if (!(desc.out_flags & PR_POLL_READ))
     return;
 
-  while (true)
+  while (!closed() && !mDataEventHandler)
   {
     std::stringstream buf;
     PRUint32 numRead = mBufSocket.readLine(buf);
@@ -74,11 +106,20 @@ CommandEventHandler::handleEvent(PRPollDesc desc)
       break;
     std::string line(trim(buf.str()));
     handleLine(line);
-    if (!closed())
+    if (!closed() && !mDataEventHandler)
       sendPrompt();
   }
+
+  checkDataEventHandler(desc);
   if (mBufSocket.closed())
+  {
+    if (mDataEventHandler)
+    {
+      delete mDataEventHandler;
+      mDataEventHandler = NULL;
+    }
     close();
+  }
 }
 
 
@@ -119,6 +160,8 @@ CommandEventHandler::handleLine(std::string line)
     result = power(cl.args);
   else if (cl.cmd.compare("ps") == 0)
     result = ps(cl.args);
+  else if (cl.cmd.compare("pull") == 0)
+    result = pull(cl.args);
   else if (cl.cmd.compare("isDir") == 0)
     result = isDir(cl.args);
   else if (cl.cmd.compare("ls") == 0)
@@ -310,7 +353,8 @@ CommandEventHandler::exec(std::vector<std::string>& args)
     char *r_env;
     char *env = strtok_r(envVarStr, ",", &r_env);
     // now we have something like env1=val1
-    while (env) {
+    while (env)
+    {
       int len = strlen(env);
       int pos = -1;
       for (int i = 0; i < len; ++i)
@@ -513,6 +557,19 @@ CommandEventHandler::ps(std::vector<std::string>& args)
     ret << buffer;
 
   return ret.str();
+}
+
+
+std::string
+CommandEventHandler::pull(std::vector<std::string>& args)
+{
+  if (args.size() < 1)
+    return agentWarnInvalidNumArgs(1);
+  std::string path(args[0]);
+  PRUint64 start = args.size() < 2 ? 0 : PR_strtod(args[1].c_str(), NULL);
+  PRUint64 size = args.size() < 3 ? 0 : PR_strtod(args[2].c_str(), NULL);
+  mDataEventHandler = new PullFileEventHandler(mBufSocket, path, start, size);
+  return "";
 }
 
 
