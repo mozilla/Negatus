@@ -15,7 +15,7 @@ public:
 
   virtual void close();
 
-  void listen(PRNetAddr addr);
+  PRStatus listen(PRNetAddr addr);
   virtual void getPollDescs(std::vector<PRPollDesc>& desc);
   virtual void handleEvent(PRPollDesc handle);
   virtual std::string name() { return "SocketAcceptor"; }

@@ -3,9 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 #include "SocketAcceptor.h"
+#include "CommandEventHandler.h"
 #include "Logging.h"
 #include "Reactor.h"
-#include "SessionEventHandler.h"
 
 
 SocketAcceptor::SocketAcceptor()
@@ -28,14 +28,16 @@ SocketAcceptor::close()
 }
 
 
-void
+PRStatus
 SocketAcceptor::listen(PRNetAddr addr)
 {
   // FIXME: log errors
   if (mSocket)
-    return;
+    return PR_FAILURE;
 
   mSocket = PR_OpenTCPSocket(PR_AF_INET);
+  if (!mSocket)
+    return PR_FAILURE;
 
   PRSocketOptionData sockOpt;
   sockOpt.option = PR_SockOpt_Nonblocking;
@@ -45,9 +47,13 @@ SocketAcceptor::listen(PRNetAddr addr)
   sockOpt.value.reuse_addr = PR_TRUE;
   PR_SetSocketOption(mSocket, &sockOpt);
 
-  PR_Bind(mSocket, &addr);
-  PR_Listen(mSocket, 128);
-  Reactor::instance()->registerHandler(this);
+  PRStatus status = PR_Bind(mSocket, &addr);
+  if (status == PR_FAILURE)
+    return status;
+  status = PR_Listen(mSocket, 128);
+  if (status == PR_SUCCESS)
+    Reactor::instance()->registerHandler(this);
+  return status;
 }
 
 
@@ -79,5 +85,6 @@ SocketAcceptor::handleEvent(PRPollDesc desc)
   sockOpt.option = PR_SockOpt_Nonblocking;
   sockOpt.value.non_blocking = PR_TRUE;
   PR_SetSocketOption(newSocket, &sockOpt);
-  SessionEventHandler* session = new SessionEventHandler(newSocket);
+  CommandEventHandler* handler = new CommandEventHandler(newSocket);
+  Reactor::instance()->registerHandler(handler);
 }

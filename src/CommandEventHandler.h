@@ -7,19 +7,17 @@
 
 #include <prio.h>
 #include <sstream>
+#include "BufferedSocket.h"
 #include "EventHandler.h"
 
 #define BUFSIZE 1024
 
-class BufferedSocket;
-class SessionEventHandler;
-
 class CommandEventHandler: public EventHandler
 {
 public:
-  CommandEventHandler(BufferedSocket& bufSocket,
-                      SessionEventHandler& session);
+  CommandEventHandler(PRFileDesc* socket);
 
+  virtual void close();
   virtual void getPollDescs(std::vector<PRPollDesc>& descs);
   virtual void handleEvent(PRPollDesc desc);
   virtual std::string name() { return "CommandEventHandler"; }
@@ -34,8 +32,8 @@ private:
     std::vector<std::string> args;
   };
 
-  BufferedSocket& mBufSocket;
-  SessionEventHandler& mSession;
+  BufferedSocket mBufSocket;
+  EventHandler* mDataEventHandler;
   std::string mPrompt;
 
   void sendPrompt();
@@ -46,6 +44,7 @@ private:
   std::string readTextFile(std::string path);
   int getFirstIntPos(char *str, int limit);
   std::string joinPaths(std::string p1, std::string p2);
+  void checkDataEventHandler(PRPollDesc desc);
 
   // Command implementations
   std::string cat(std::vector<std::string>& args);
@@ -64,6 +63,7 @@ private:
   std::string os(std::vector<std::string>& args);
   std::string power(std::vector<std::string>& args);
   std::string ps(std::vector<std::string>& args);
+  std::string pull(std::vector<std::string>& args);
   std::string quit(std::vector<std::string>& args);
   std::string screen(std::vector<std::string>& args);
   std::string systime(std::vector<std::string>& args);
