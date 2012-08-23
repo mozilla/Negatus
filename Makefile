@@ -7,8 +7,8 @@ SRCS=\
 	src/BufferedSocket.cpp \
 	src/CommandEventHandler.cpp \
 	src/Logging.cpp \
+	src/PullFileEventHandler.cpp \
 	src/Reactor.cpp \
-	src/SessionEventHandler.cpp \
 	src/SocketAcceptor.cpp \
 	src/Strings.cpp \
 	src/SUTAgent.cpp
@@ -25,4 +25,3 @@ agent: $(OBJS)
 
 clean:
 	rm -f src/*.o agent
-
