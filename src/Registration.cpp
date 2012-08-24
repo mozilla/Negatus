@@ -80,6 +80,7 @@ bool read_ini(std::string path, std::map<std::string, dict> & data) {
     if (line[0] == '[') { // section titles
       int idx = line.find_last_of(']');
       if (idx == std::string::npos)
+        fclose(f);
         return false;
       c_section = trim(line.substr(1, idx - 1));
       // create new dict for this section
@@ -96,6 +97,7 @@ bool read_ini(std::string path, std::map<std::string, dict> & data) {
     std::string value = trim(line.substr(idx + 1));
     data[c_section][name] = value;
   }
+  fclose(f);
   return true;
 }
 
