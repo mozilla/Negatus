@@ -88,8 +88,10 @@ bool read_ini(std::string path, std::map<std::string, dict> & data)
     {
       int idx = line.find_last_of(']');
       if (idx == std::string::npos)
+      {
         fclose(f);
         return false;
+      }
       c_section = trim(line.substr(1, idx - 1));
       // create new dict for this section
       data[c_section] = dict();
