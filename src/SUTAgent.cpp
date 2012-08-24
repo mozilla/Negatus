@@ -15,6 +15,7 @@
 #include "Strings.h"
 #include "Reactor.h"
 #include "SocketAcceptor.h"
+#include "Registration.h"
 
 
 // FIXME: This is not portable!
@@ -30,6 +31,17 @@ void signalHandler(int signal)
 
 int main(int argc, char **argv)
 {
+
+  // --- INI stuff - work in progress
+  std::map<std::string, dict> data;
+  if (!read_ini("/data/local/SUTAgent.ini", data))
+    std::cout << "ini error" << std::endl;
+  else {
+    std::cout << "query: " << gen_query_url(data["Registration Server"]);
+    std::cout << std::endl;
+  }
+  // --
+
   signal(SIGTERM, &signalHandler);
   signal(SIGINT, &signalHandler);
   signal(SIGHUP, &signalHandler);

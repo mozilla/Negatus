@@ -11,6 +11,7 @@ SRCS=\
 	src/PullFileEventHandler.cpp \
 	src/PushFileEventHandler.cpp \
 	src/Reactor.cpp \
+	src/Registration.cpp \
 	src/SocketAcceptor.cpp \
 	src/Strings.cpp \
 	src/SUTAgent.cpp \

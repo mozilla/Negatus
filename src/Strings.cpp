@@ -17,6 +17,15 @@ trim(std::string s)
     else
       break;
   }
+  // also trim beginning whitespace
+  int first_relevant = -1;
+  for (int i = 0; i < s.size(); ++i)
+    if (!(s[i] == '\n' || s[i] == '\r' || s[i] == ' ' || s[i] == '\t')) {
+      first_relevant = i;
+      break;
+    }
+  if (first_relevant != -1)
+    s = s.substr(first_relevant);
   return s;
 }
 
