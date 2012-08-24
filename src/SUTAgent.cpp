@@ -36,7 +36,8 @@ int main(int argc, char **argv)
   std::map<std::string, dict> data;
   if (!read_ini("/data/local/SUTAgent.ini", data))
     std::cout << "ini error" << std::endl;
-  else {
+  else
+  {
     std::cout << "query: " << gen_query_url(data["Registration Server"]);
     std::cout << std::endl;
   }

@@ -12,7 +12,8 @@
 #include "Strings.h"
 
 
-bool is_alpha(char c) {
+bool is_alpha(char c)
+{
   if (('0' <= c && c <= '9') ||
       ('a' <= c && c <= 'z') ||
       ('A' <= c && c <= 'Z'))
@@ -21,21 +22,25 @@ bool is_alpha(char c) {
 }
 
 
-bool is_allowed_char(char c) {
+bool is_allowed_char(char c)
+{
   if (c == '.' || c == '-' || c == '_' || c == '~')
     return true;
   return false;
 }
 
 
-std::string urlencode(std::string plain) {
+std::string urlencode(std::string plain)
+{
   std::ostringstream buf;
 
-  for (int i = 0; i < plain.size(); ++i) {
+  for (int i = 0; i < plain.size(); ++i)
+  {
     char c = plain[i];
     if (is_alpha(c) || is_allowed_char(c))
       buf << c;
-    else {
+    else
+    {
       char hex[3];
       sprintf(hex, "%02X", c);
       buf << "%" << hex;
@@ -45,7 +50,8 @@ std::string urlencode(std::string plain) {
 }
 
 
-std::string gen_query_url(dict data) {
+std::string gen_query_url(dict data)
+{
   std::ostringstream buf;
   std::map<std::string, std::string>::iterator it;
 
@@ -59,17 +65,18 @@ std::string gen_query_url(dict data) {
 }
 
 
-bool read_ini(std::string path, std::map<std::string, dict> & data) {
+bool read_ini(std::string path, std::map<std::string, dict> & data)
+{
   FILE *f = fopen(path.c_str(), "r");
-  if (!f) {
+  if (!f)
     return false;
-  }
 
   char buf[1024];
   std::string c_section;
   dict c_map;
 
-  while (fgets(buf, 1024, f)) {
+  while (fgets(buf, 1024, f))
+  {
     std::string line = trim(std::string(buf));
 
     if (line.size() == 0) // blank lines
@@ -77,7 +84,8 @@ bool read_ini(std::string path, std::map<std::string, dict> & data) {
     if (line[0] == '#') // comments
       continue;
 
-    if (line[0] == '[') { // section titles
+    if (line[0] == '[') // section titles
+    {
       int idx = line.find_last_of(']');
       if (idx == std::string::npos)
         fclose(f);
