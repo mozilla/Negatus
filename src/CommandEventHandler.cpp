@@ -87,7 +87,7 @@ CommandEventHandler::checkDataEventHandler(PRPollDesc desc)
     }
     else
       return;
-  }  
+  }
 }
 
 
@@ -182,7 +182,10 @@ CommandEventHandler::handleLine(std::string line)
   else if (cl.cmd.compare("testroot") == 0)
     result = testroot(cl.args);
   if (!result.empty())
+  {
     mBufSocket.write(result);
+    mBufSocket.write("\0", 1); // devmgrSUT.py expets NULL terminated str
+  }
 }
 
 
@@ -190,6 +193,7 @@ void
 CommandEventHandler::sendPrompt()
 {
   mBufSocket.write(mPrompt.c_str(), mPrompt.size());
+  mBufSocket.write("\0", 1); // devmgrSUT.py expects NULL terminated str
 }
 
 
@@ -702,5 +706,5 @@ CommandEventHandler::do_rmdr(std::string path, std::ostringstream &out)
 std::string
 CommandEventHandler::testroot(std::vector<std::string>& args)
 {
-  return std::string("/data/local");
+  return std::string("/data/local") + ENDL;
 }
