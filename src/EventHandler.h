@@ -5,6 +5,7 @@
 #ifndef negatus_event_handler_h
 #define negatus_event_handler_h
 
+#include <prinrval.h>
 #include <prio.h>
 #include <prtime.h>
 #include <string>
@@ -17,17 +18,14 @@ public:
 
   virtual void close() { mClosed = true; }
   bool closed() { return mClosed; }
-  virtual void getPollDescs(std::vector<PRPollDesc>& descs) = 0;
-  PRTime getTimeout() { return mTimeout; }
+  virtual void getPollDescs(std::vector<PRPollDesc>& descs) {};
   virtual void handleEvent(PRPollDesc handle) {}
   virtual void handleTimeout() {}
   virtual std::string name() { return "EventHandler"; }
 
 protected:
-  void setTimeout(PRTime timeout) { mTimeout = timeout; }
-  void clearTimeout() { mTimeout = 0; }
-
-  PRTime mTimeout;
+  void registerWithReactor();
+  void setTimeout(PRIntervalTime interval);
 
 private:
   bool mClosed;
