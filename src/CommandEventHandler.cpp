@@ -630,7 +630,7 @@ CommandEventHandler::ls(std::vector<std::string>& args)
 
 
 std::string
-CommandEventHandler::mkdir(std::vector<std::string>& args)
+CommandEventHandler::mkdr(std::vector<std::string>& args)
 {
   if (args.size() < 1)
     return agentWarnInvalidNumArgs(1);
