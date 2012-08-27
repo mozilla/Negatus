@@ -52,7 +52,7 @@ SocketAcceptor::listen(PRNetAddr addr)
     return status;
   status = PR_Listen(mSocket, 128);
   if (status == PR_SUCCESS)
-    Reactor::instance()->registerHandler(this);
+    registerWithReactor();
   return status;
 }
 
@@ -86,5 +86,4 @@ SocketAcceptor::handleEvent(PRPollDesc desc)
   sockOpt.value.non_blocking = PR_TRUE;
   PR_SetSocketOption(newSocket, &sockOpt);
   CommandEventHandler* handler = new CommandEventHandler(newSocket);
-  Reactor::instance()->registerHandler(handler);
 }

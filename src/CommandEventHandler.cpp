@@ -42,6 +42,7 @@ CommandEventHandler::CommandLine::CommandLine(std::string line)
 CommandEventHandler::CommandEventHandler(PRFileDesc* socket)
   : mBufSocket(socket), mDataEventHandler(NULL), mPrompt("$>")
 {
+  registerWithReactor();
   sendPrompt();
 }
 

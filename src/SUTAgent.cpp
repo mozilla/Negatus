@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 
   if (optionError)
     return 1;
-  
+
   SocketAcceptor* acceptor = new SocketAcceptor();
   PRNetAddr acceptorAddr;
   PR_InitializeNetAddr(PR_IpAddrAny, port, &acceptorAddr);
@@ -91,7 +91,9 @@ int main(int argc, char **argv)
     std::cerr << "Failure to open socket: " << PR_GetError() << std::endl;
     return 1;
   }
+
   Reactor* reactor = Reactor::instance();
+
   while (!wantToDie)
     reactor->run();
   reactor->stop();
