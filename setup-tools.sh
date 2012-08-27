@@ -1,6 +1,9 @@
 #!/bin/sh
 
-wget http://busybox.net/downloads/binaries/1.19.0/busybox-armv6l
+if [ ! -f busybox-armv6l ]
+then
+    wget http://busybox.net/downloads/binaries/1.19.0/busybox-armv6l
+fi
 $ADB remount
 $ADB push busybox-armv6l /system/bin/busybox
 
