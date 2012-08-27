@@ -185,7 +185,7 @@ CommandEventHandler::handleLine(std::string line)
   if (!result.empty())
   {
     mBufSocket.write(result);
-    mBufSocket.write("\0", 1); // devmgrSUT.py expets NULL terminated str
+    mBufSocket.write(ENDL);
   }
 }
 
@@ -293,7 +293,7 @@ CommandEventHandler::cwd(std::vector<std::string>& args)
 {
   char buffer[BUFSIZE];
   getcwd(buffer, BUFSIZE);
-  return std::string(buffer) + ENDL;
+  return std::string(buffer);
 }
 
 
@@ -301,7 +301,7 @@ std::string
 CommandEventHandler::clok(std::vector<std::string>& args)
 {
   PRUint64 now = PR_Now() / PR_USEC_PER_SEC;
-  return itoa(now) + ENDL;
+  return itoa(now);
 }
 
 
@@ -317,8 +317,8 @@ CommandEventHandler::dirw(std::vector<std::string>& args)
     return ret;
   }
   if (PR_Access(path.c_str(), PR_ACCESS_WRITE_OK) == PR_SUCCESS)
-    return std::string(path + " is writable" + ENDL);
-  return std::string(path + " is not writable" + ENDL);
+    return std::string(path + " is writable");
+  return std::string(path + " is not writable");
 }
 
 
@@ -412,7 +412,7 @@ CommandEventHandler::exec(std::vector<std::string>& args)
   }
 
   if (status == 0)
-    return std::string("success") + ENDL;
+    return std::string("success");
   return agentWarn("error");
 }
 
@@ -427,7 +427,7 @@ CommandEventHandler::hash(std::vector<std::string>& args)
   if (PR_Access(path.c_str(), PR_ACCESS_READ_OK) != PR_SUCCESS)
     return std::string(agentWarn("cannot open file for reading"));
 
-  return fileHash(path) + std::string(ENDL);
+  return fileHash(path);
 }
 
 
@@ -636,8 +636,8 @@ CommandEventHandler::mkdr(std::vector<std::string>& args)
     return agentWarnInvalidNumArgs(1);
   std::string path = args[0];
   if (PR_MkDir(path.c_str(), 755) != PR_SUCCESS)
-    return std::string("Could not create directory " + path) + ENDL;
-  return std::string(path + " successfuly created") + ENDL;
+    return std::string("Could not create directory " + path);
+  return std::string(path + " successfuly created");
 }
 
 
@@ -724,5 +724,5 @@ CommandEventHandler::do_rmdr(std::string path, std::ostringstream &out)
 std::string
 CommandEventHandler::testroot(std::vector<std::string>& args)
 {
-  return std::string("/data/local") + ENDL;
+  return std::string("/data/local");
 }
