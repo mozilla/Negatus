@@ -168,12 +168,12 @@ CommandEventHandler::handleLine(std::string line)
     result = pull(cl.args);
   else if (cl.cmd.compare("push") == 0)
     result = push(cl.args);
-  else if (cl.cmd.compare("isDir") == 0)
+  else if (cl.cmd.compare("isdir") == 0)
     result = isDir(cl.args);
   else if (cl.cmd.compare("ls") == 0)
     result = ls(cl.args);
-  else if (cl.cmd.compare("mkdir") == 0)
-    result = mkdir(cl.args);
+  else if (cl.cmd.compare("mkdr") == 0)
+    result = mkdr(cl.args);
   else if (cl.cmd.compare("quit") == 0)
     result = quit(cl.args);
   else if (cl.cmd.compare("rm") == 0)

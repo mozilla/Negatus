@@ -55,7 +55,7 @@ private:
   std::string isDir(std::string path);
   std::string ls(std::vector<std::string>& args);
   std::string memory(std::vector<std::string>& args);
-  std::string mkdir(std::vector<std::string>& args);
+  std::string mkdr(std::vector<std::string>& args);
   std::string os(std::vector<std::string>& args);
   std::string power(std::vector<std::string>& args);
   std::string ps(std::vector<std::string>& args);
