@@ -251,7 +251,7 @@ CommandEventHandler::cat(std::vector<std::string>& args)
   std::string path(args.size() ? args[0] : "");
   if (path.compare("") == 0)
     return agentWarn("cat needs an argument");
-  if (isDir(path).compare("") == 0)
+  if (isDir(path).compare("TRUE") == 0)
     return agentWarn("cannot cat a dir");
 
   return readTextFile(path);
@@ -268,8 +268,12 @@ CommandEventHandler::cd(std::vector<std::string>& args)
 
   // check if path exists and it is a dir
   std::string ret = isDir(path);
-  if (ret.compare("") != 0)
+  if (ret.compare("TRUE") != 0)
+  {
+    if (ret.compare("FALSE") == 0)
+      return agentWarn("path is not a dir");
     return ret;
+  }
 
   // check for read permissions
   PRStatus success = PR_Access(p, PR_ACCESS_READ_OK);
@@ -306,8 +310,12 @@ CommandEventHandler::dirw(std::vector<std::string>& args)
 {
   std::string path(args.size() ? args[0] : "");
   std::string ret = isDir(path);
-  if (ret.compare("") != 0)
+  if (ret.compare("TRUE") != 0)
+  {
+    if (ret.compare("FALSE") == 0)
+      return agentWarn("path is not a dir");
     return ret;
+  }
   if (PR_Access(path.c_str(), PR_ACCESS_WRITE_OK) == PR_SUCCESS)
     return std::string(path + " is writable" + ENDL);
   return std::string(path + " is not writable" + ENDL);
@@ -583,12 +591,11 @@ CommandEventHandler::isDir(std::string path)
   if (success == PR_SUCCESS)
   {
     if (info.type == PR_FILE_DIRECTORY)
-      return std::string("");
-    return agentWarn("path is not a directory");
+      return std::string("TRUE");
+    return std::string("FALSE");
   }
   return agentWarn("invalid path");
 }
-
 
 std::string
 CommandEventHandler::ls(std::vector<std::string>& args)
@@ -599,8 +606,12 @@ CommandEventHandler::ls(std::vector<std::string>& args)
   std::ostringstream out;
   std::string ret = isDir(path);
 
-  if (ret.compare("") != 0)
+  if (ret.compare("TRUE") != 0)
+  {
+    if (ret.compare("FALSE") == 0)
+      return agentWarn("path is not a dir");
     return ret;
+  }
 
   PRDir *dir = PR_OpenDir(path.c_str());
   PRDirEntry *entry = PR_ReadDir(dir, PR_SKIP_BOTH);
@@ -675,13 +686,19 @@ CommandEventHandler::rmdr(std::vector<std::string>& args)
 void
 CommandEventHandler::do_rmdr(std::string path, std::ostringstream &out)
 {
-  std::string ret;
+  std::string ret = isDir(path);
   const char *p = path.c_str();
 
   // if it's a file, nothing special to do
-  if (isDir(path).compare("") != 0)
+  if (ret.compare("TRUE") != 0)
   {
-    rm(path);
+    if (ret.compare("FALSE") == 0)
+    {
+      rm(path);
+      return;
+    }
+    // if this does not exist, return
+    out << ret;
     return;
   }
 
