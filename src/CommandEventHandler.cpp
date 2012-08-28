@@ -24,6 +24,8 @@
 #include <prproces.h>
 #include <prtypes.h>
 
+#define PERMS755 PR_IRWXU | PR_IRGRP | PR_IXGRP | PR_IROTH | PR_IXOTH
+
 
 CommandEventHandler::CommandLine::CommandLine(std::string line)
   : cmd("")
@@ -638,7 +640,7 @@ CommandEventHandler::mkdr(std::vector<std::string>& args)
   if (args.size() < 1)
     return agentWarnInvalidNumArgs(1);
   std::string path = args[0];
-  if (PR_MkDir(path.c_str(), 755) != PR_SUCCESS)
+  if (PR_MkDir(path.c_str(), PERMS755) != PR_SUCCESS)
     return std::string("Could not create directory " + path);
   return std::string(path + " successfuly created");
 }
