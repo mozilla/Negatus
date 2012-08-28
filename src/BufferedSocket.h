@@ -20,6 +20,8 @@ public:
 
   void close();
   bool closed() { return !mSocket; }
+  bool recvClosed() { return mRecvClosed; }
+  bool sendClosed() { return mSendClosed; }
 
   PRFileDesc* fd() { return mSocket; }
 
@@ -39,9 +41,13 @@ private:
   PRFileDesc* mSocket;
   BlockBuffer mReadBuffer;
   BlockBuffer mWriteBuffer;
-  char* tmpBuf;
+  char* mTmpBuf;
+  bool mRecvClosed;
+  bool mSendClosed;
 
   PRUint32 readIntoBuffer(PRUint32 size);
+  void closeRecv();
+  void closeSend();
 };
 
 #endif

@@ -8,24 +8,27 @@
 
 
 BufferedSocket::BufferedSocket(PRFileDesc* socket)
-  : mSocket(socket), tmpBuf(new char[1024])
+  : mSocket(socket), mTmpBuf(new char[1024]), mRecvClosed(false),
+    mSendClosed(false)
 {
 }
 
 
 BufferedSocket::~BufferedSocket()
 {
-  delete[] tmpBuf;
+  delete[] mTmpBuf;
 }
 
 
 void
 BufferedSocket::close()
 {
-  if (mSocket && !closed())
+  if (!closed())
   {
     // FIXME: log errors
     PR_Shutdown(mSocket, PR_SHUTDOWN_BOTH);
+    mRecvClosed = true;
+    mSendClosed = true;
     PR_Close(mSocket);
     mSocket = NULL;
   }
@@ -38,7 +41,8 @@ BufferedSocket::read(char* buf, PRUint32 size)
   while (readIntoBuffer(1024))
     continue;
 
-  return mReadBuffer.get(buf, mReadBuffer.avail());
+  PRUint32 avail = mReadBuffer.avail() > size ? size : mReadBuffer.avail();
+  return mReadBuffer.get(buf, avail);
 }
 
 
@@ -55,7 +59,16 @@ BufferedSocket::readLine(std::stringstream& buf)
 void
 BufferedSocket::write(const char* buf, PRUint32 size)
 {
-  PR_Send(mSocket, buf, size, 0, PR_INTERVAL_NO_WAIT);
+  if (!size || mSendClosed)
+    return;
+
+  PRInt32 status = PR_Send(mSocket, buf, size, 0, PR_INTERVAL_NO_WAIT);
+  if (status == -1)
+  {
+    PRErrorCode err = PR_GetError();
+    if (err != PR_WOULD_BLOCK_ERROR)
+      closeSend();
+  }
 }
 
 
@@ -69,26 +82,44 @@ BufferedSocket::write(std::string line)
 PRUint32
 BufferedSocket::readIntoBuffer(PRUint32 size)
 {
-  if (!size)
+  if (!size || mRecvClosed)
     return 0;
 
   PRInt32 numRead = 0;
 
-  PRInt32 status = PR_Recv(mSocket, tmpBuf, size, 0, PR_INTERVAL_NO_WAIT);
+  PRInt32 status = PR_Recv(mSocket, mTmpBuf, size, 0, PR_INTERVAL_NO_WAIT);
   if (status == 0)
-    close();
+    closeRecv();
   else if (status == -1)
   {
     PRErrorCode err = PR_GetError();
     if (err != PR_WOULD_BLOCK_ERROR)
-      close();
+      closeRecv();
   }
   else if (status > 0)
   {
-    tmpBuf[status] = 0;
-    mReadBuffer.put(tmpBuf, status);
+    mTmpBuf[status] = 0;
+    mReadBuffer.put(mTmpBuf, status);
     numRead = status;
   }
 
   return numRead;
+}
+
+
+void
+BufferedSocket::closeRecv()
+{
+  mRecvClosed = true;
+  if (mSendClosed)
+    close();
+}
+
+
+void
+BufferedSocket::closeSend()
+{
+  mSendClosed = true;
+  if (mRecvClosed)
+    close();
 }

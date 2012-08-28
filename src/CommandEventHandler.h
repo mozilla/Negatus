@@ -40,7 +40,7 @@ private:
   std::string readTextFile(std::string path);
   int getFirstIntPos(char *str, int limit);
   std::string joinPaths(std::string p1, std::string p2);
-  void checkDataEventHandler(PRPollDesc desc);
+  bool checkDataEventHandler(PRPollDesc desc);
 
   // Command implementations
   std::string cat(std::vector<std::string>& args);

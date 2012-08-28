@@ -24,6 +24,7 @@
 #include <prproces.h>
 #include <prtypes.h>
 
+
 CommandEventHandler::CommandLine::CommandLine(std::string line)
   : cmd("")
 {
@@ -62,7 +63,7 @@ CommandEventHandler::getPollDescs(std::vector<PRPollDesc>& descs)
   {
     if (mDataEventHandler)
       mDataEventHandler->getPollDescs(descs);
-    else
+    else if (!mBufSocket.recvClosed())
     {
       PRPollDesc desc;
       desc.fd = mBufSocket.fd();
@@ -73,7 +74,7 @@ CommandEventHandler::getPollDescs(std::vector<PRPollDesc>& descs)
 }
 
 
-void
+bool
 CommandEventHandler::checkDataEventHandler(PRPollDesc desc)
 {
   if (!closed() && mDataEventHandler)
@@ -85,17 +86,19 @@ CommandEventHandler::checkDataEventHandler(PRPollDesc desc)
       delete mDataEventHandler;
       mDataEventHandler = NULL;
       sendPrompt();
+      return false;
     }
-    else
-      return;
+    return true;
   }
+  return false;
 }
 
 
 void
 CommandEventHandler::handleEvent(PRPollDesc desc)
 {
-  checkDataEventHandler(desc);
+  if (checkDataEventHandler(desc))
+    return;
 
   if (desc.fd != mBufSocket.fd())
     return;
@@ -109,15 +112,13 @@ CommandEventHandler::handleEvent(PRPollDesc desc)
     if (!numRead)
       break;
     std::string line(trim(buf.str()));
-    if (mBufSocket.closed())
-      close();
     handleLine(line);
-    if (!closed() && !mDataEventHandler)
+    if (!mBufSocket.sendClosed() && !mDataEventHandler)
       sendPrompt();
   }
 
   checkDataEventHandler(desc);
-  if (mBufSocket.closed())
+  if (mBufSocket.recvClosed())
   {
     if (mDataEventHandler)
     {
@@ -184,7 +185,7 @@ CommandEventHandler::handleLine(std::string line)
     result = rmdr(cl.args);
   else if (cl.cmd.compare("testroot") == 0)
     result = testroot(cl.args);
-  if (!result.empty() && !closed())
+  if (!result.empty() && !mBufSocket.sendClosed())
   {
     mBufSocket.write(result);
     mBufSocket.write(ENDL);
