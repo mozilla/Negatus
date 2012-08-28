@@ -109,6 +109,8 @@ CommandEventHandler::handleEvent(PRPollDesc desc)
     if (!numRead)
       break;
     std::string line(trim(buf.str()));
+    if (mBufSocket.closed())
+      close();
     handleLine(line);
     if (!closed() && !mDataEventHandler)
       sendPrompt();
@@ -182,7 +184,7 @@ CommandEventHandler::handleLine(std::string line)
     result = rmdr(cl.args);
   else if (cl.cmd.compare("testroot") == 0)
     result = testroot(cl.args);
-  if (!result.empty())
+  if (!result.empty() && !closed())
   {
     mBufSocket.write(result);
     mBufSocket.write(ENDL);
