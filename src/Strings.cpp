@@ -34,19 +34,9 @@ trim(std::string s)
 std::string
 itoa(PRUint64 i)
 {
-  PRUintn len;
-  PRUint64 tmp = i;
-  for (len = 0; tmp > 0; len++)
-    tmp /= 10;
-  char s[len+1];
-  s[len-1] = 0;
-  tmp = i;
-  for (PRUintn j = 0; j < len; j++)
-  {
-    s[len-1-j] = 0x30 + (tmp % 10);
-    tmp /= 10;
-  }
-  return std::string(s);
+  std::ostringstream out;
+  out << i;
+  return out.str();
 }
 
 
