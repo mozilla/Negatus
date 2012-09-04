@@ -99,6 +99,10 @@ CommandEventHandler::checkDataEventHandler(PRPollDesc desc)
 void
 CommandEventHandler::handleEvent(PRPollDesc desc)
 {
+  // FIXME: we have two modes: data and command
+  // keep draining until whichever mode we are in does not change and no more
+  // data to be read
+
   if (checkDataEventHandler(desc))
     return;
 

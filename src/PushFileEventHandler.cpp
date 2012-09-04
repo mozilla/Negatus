@@ -62,15 +62,20 @@ PushFileEventHandler::handleEvent(PRPollDesc desc)
     return;
   if (!(desc.out_flags & PR_POLL_READ))
     return;
-  
-  PRUint32 blockSize = (mSize - mBytesWritten) < BLOCK_SIZE
-    ? mSize - mBytesWritten : BLOCK_SIZE;
- 
-  PRUint32 bytes = mBufSocket.read(mTmpBuf, blockSize);
-  if (bytes > 0)
+
+  while (mBytesWritten < mSize)
   {
-    PR_Write(mFile, mTmpBuf, bytes);
-    mBytesWritten += bytes;
+    PRUint32 blockSize = (mSize - mBytesWritten) < BLOCK_SIZE
+      ? mSize - mBytesWritten : BLOCK_SIZE;
+ 
+    PRUint32 bytes = mBufSocket.read(mTmpBuf, blockSize);
+    if (bytes > 0)
+    {
+      PR_Write(mFile, mTmpBuf, bytes);
+      mBytesWritten += bytes;
+    }
+    else
+      break;
   }
   // a closed socket will be detected automatically by CommandEventHandler.
   if (mSize == mBytesWritten)
