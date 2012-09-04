@@ -99,31 +99,37 @@ CommandEventHandler::checkDataEventHandler(PRPollDesc desc)
 void
 CommandEventHandler::handleEvent(PRPollDesc desc)
 {
-  // FIXME: we have two modes: data and command
-  // keep draining until whichever mode we are in does not change and no more
-  // data to be read
-
-  if (checkDataEventHandler(desc))
-    return;
-
-  if (desc.fd != mBufSocket.fd())
-    return;
-  if (!(desc.out_flags & PR_POLL_READ))
-    return;
-
-  while (!closed() && !mDataEventHandler)
+  // Make sure we drain all the data we can from the socket.
+  while (!closed())
   {
-    std::stringstream buf;
-    PRUint32 numRead = mBufSocket.readLine(buf);
-    if (!numRead)
+    if (checkDataEventHandler(desc))
       break;
-    std::string line(trim(buf.str()));
-    handleLine(line);
-    if (!mBufSocket.sendClosed() && !mDataEventHandler)
-      sendPrompt();
+
+    if (desc.fd != mBufSocket.fd())
+      break;
+    if (!(desc.out_flags & PR_POLL_READ))
+      break;
+
+    bool noMoreToRead = false;
+    while (!closed() && !mDataEventHandler)
+    {
+      std::stringstream buf;
+      PRUint32 numRead = mBufSocket.readLine(buf);
+      if (!numRead)
+      {
+        noMoreToRead = true;
+        break;
+      }
+      std::string line(trim(buf.str()));
+      handleLine(line);
+      if (!mBufSocket.sendClosed() && !mDataEventHandler)
+        sendPrompt();
+    }
+
+    if (noMoreToRead)
+      break;
   }
 
-  checkDataEventHandler(desc);
   if (mBufSocket.recvClosed())
   {
     if (mDataEventHandler)
