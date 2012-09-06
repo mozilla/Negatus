@@ -654,7 +654,7 @@ CommandEventHandler::mkdr(std::vector<std::string>& args)
     return agentWarnInvalidNumArgs(1);
   std::string path = args[0];
   if (PR_MkDir(path.c_str(), PERMS755) != PR_SUCCESS)
-    return std::string("Could not create directory " + path);
+    return agentWarn("Could not create directory " + path);
   return std::string(path + " successfuly created");
 }
 
