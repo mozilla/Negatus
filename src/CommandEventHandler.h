@@ -69,6 +69,7 @@ private:
   std::string rmdr(std::vector<std::string>& args);
   std::string testroot(std::vector<std::string>& args);
   std::string uptime(std::vector<std::string>& args);
+  std::string ver(std::vector<std::string>& args);
 };
 
 #endif

@@ -197,6 +197,8 @@ CommandEventHandler::handleLine(std::string line)
     result = rmdr(cl.args);
   else if (cl.cmd.compare("testroot") == 0)
     result = testroot(cl.args);
+  else if (cl.cmd.compare("ver") == 0)
+    result = ver(cl.args);
   if (!result.empty() && !mBufSocket.sendClosed())
   {
     mBufSocket.write(result);
@@ -741,4 +743,11 @@ std::string
 CommandEventHandler::testroot(std::vector<std::string>& args)
 {
   return std::string("/data/local");
+}
+
+
+std::string
+CommandEventHandler::ver(std::vector<std::string>& args)
+{
+  return std::string("SUTAgentAndroid Version 1.00");
 }
