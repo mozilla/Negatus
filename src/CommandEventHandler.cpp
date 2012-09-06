@@ -685,7 +685,7 @@ CommandEventHandler::rm(std::string path)
 {
   if (PR_Delete(path.c_str()) == PR_SUCCESS)
     return std::string("");
-  return std::string("error: could not delete " + path);
+  return agentWarn("error: could not delete " + path);
 }
 
 
