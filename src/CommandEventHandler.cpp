@@ -442,7 +442,7 @@ CommandEventHandler::hash(std::vector<std::string>& args)
   std::string path = args[0];
 
   if (PR_Access(path.c_str(), PR_ACCESS_READ_OK) != PR_SUCCESS)
-    return std::string(agentWarn("cannot open file for reading"));
+    return agentWarn("cannot open file for reading");
 
   return fileHash(path);
 }
