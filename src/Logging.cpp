@@ -8,7 +8,7 @@
 std::string
 agentWarn(std::string errStr)
 {
-  return "### AGENT-WARNING: " + errStr;
+  return "##AGENT-WARNING## : " + errStr;
 }
 
 
