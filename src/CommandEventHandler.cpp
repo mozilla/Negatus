@@ -299,7 +299,7 @@ CommandEventHandler::cd(std::vector<std::string>& args)
     // update the cwd
     int s = chdir(p);
     if (s == 0)
-      return cwd(args);
+      return "";
   }
   return agentWarn("no permissions");
 }
