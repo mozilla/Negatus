@@ -210,8 +210,8 @@ CommandEventHandler::handleLine(std::string line)
 void
 CommandEventHandler::sendPrompt()
 {
-  mBufSocket.write(mPrompt.c_str(), mPrompt.size());
-  mBufSocket.write("\0", 1); // devmgrSUT.py expects NULL terminated str
+  // devmgrSUT.py expects NULL terminated str
+  mBufSocket.write(mPrompt.c_str(), mPrompt.size() + 1);
 }
 
 
