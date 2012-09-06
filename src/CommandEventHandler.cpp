@@ -659,10 +659,6 @@ CommandEventHandler::mkdr(std::vector<std::string>& args)
 }
 
 
-// TODO push
-// TODO pull
-// TODO rebt
-
 std::string
 CommandEventHandler::quit(std::vector<std::string>& args)
 {
