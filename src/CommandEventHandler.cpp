@@ -680,7 +680,7 @@ std::string
 CommandEventHandler::rm(std::string path)
 {
   if (PR_Delete(path.c_str()) == PR_SUCCESS)
-    return std::string("");
+    return std::string("removing file" + path);
   return agentWarn("error: could not delete " + path);
 }
 
