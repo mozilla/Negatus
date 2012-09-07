@@ -9,7 +9,7 @@
 #include <prtypes.h>
 #include <string>
 
-#define ENDL "\r\n"
+#define ENDL "\n"
 
 std::string
 trim(std::string s);

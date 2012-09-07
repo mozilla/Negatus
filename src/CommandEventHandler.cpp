@@ -268,13 +268,11 @@ CommandEventHandler::joinPaths(std::string p1, std::string p2)
 std::string
 CommandEventHandler::cat(std::vector<std::string>& args)
 {
-  std::string path(args.size() ? args[0] : "");
-  if (path.compare("") == 0)
-    return agentWarn("cat needs an argument");
-  if (isDir(path).compare("TRUE") == 0)
-    return agentWarn("cannot cat a dir");
-
-  return readTextFile(path);
+  if (args.size() < 1)
+    return agentWarnInvalidNumArgs(1);
+  std::string path(args[0]);
+  mDataEventHandler = new PullFileEventHandler(mBufSocket, path, 0, 0, false);
+  return "";
 }
 
 
@@ -445,7 +443,11 @@ CommandEventHandler::hash(std::vector<std::string>& args)
   std::string path = args[0];
 
   if (PR_Access(path.c_str(), PR_ACCESS_READ_OK) != PR_SUCCESS)
-    return agentWarn("cannot open file for reading");
+  {
+    std::ostringstream err;
+    err << "Couldn't calculate hash for file " << path << ": cannot open file for reading";
+    return agentWarn(err.str());
+  }
 
   return fileHash(path);
 }

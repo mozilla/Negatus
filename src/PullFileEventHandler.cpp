@@ -12,7 +12,8 @@
 PullFileEventHandler::PullFileEventHandler(BufferedSocket& bufSocket,
                                            std::string path,
                                            PRUint64 start,
-                                           PRUint64 size)
+                                           PRUint64 size,
+                                           bool includeHeader)
   : mBufSocket(bufSocket), mPath(path), mFile(NULL), mBytesRead(0), mSize(size),
     mTmpBuf(new char[BLOCK_SIZE])
 {
@@ -64,6 +65,8 @@ PullFileEventHandler::PullFileEventHandler(BufferedSocket& bufSocket,
   if (mSize == 0)
     mSize = fileInfo.size - start;
 
+  if (!includeHeader)
+    return;
   std::stringstream out;
   out << path << "," << mSize << ENDL;  
   mBufSocket.write(out.str());

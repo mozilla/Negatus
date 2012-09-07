@@ -17,7 +17,7 @@ class PullFileEventHandler: public EventHandler
 {
 public:
   PullFileEventHandler(BufferedSocket& bufSocket, std::string path,
-                       PRUint64 start, PRUint64 size);
+                       PRUint64 start, PRUint64 size, bool includeHeader=true);
   virtual ~PullFileEventHandler();
 
   virtual void close();
