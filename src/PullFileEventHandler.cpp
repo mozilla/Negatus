@@ -19,14 +19,14 @@ PullFileEventHandler::PullFileEventHandler(BufferedSocket& bufSocket,
 {
   if (PR_Access(path.c_str(), PR_ACCESS_EXISTS) != PR_SUCCESS)
   {
-    mBufSocket.write(agentWarn("file does not exist"));
+    pullError("file does not exist");
     close();
     return;
   }
 
   if (PR_Access(path.c_str(), PR_ACCESS_READ_OK) != PR_SUCCESS)
   {
-    mBufSocket.write(agentWarn("insufficient permissions to read file"));
+    pullError("insufficient permissions to read file");
     close();
     return;
   }
@@ -34,20 +34,20 @@ PullFileEventHandler::PullFileEventHandler(BufferedSocket& bufSocket,
   mFile = PR_Open(path.c_str(), PR_RDONLY, 0);
   if (!mFile)
   {
-    mBufSocket.write(agentWarn("could not open file"));
+    pullError("could not open file");
     close();
     return;
   }
   PRFileInfo fileInfo;
   if (PR_GetOpenFileInfo(mFile, &fileInfo) != PR_SUCCESS)
   {
-    mBufSocket.write(agentWarn("failed to read file info"));
+    pullError("failed to read file info");
     close();
     return;
   }
   if (fileInfo.size <= start)
   {
-    mBufSocket.write(agentWarn("start position is at or past end of file"));
+    pullError("start position is at or past end of file");
     close();
     return;
   }
@@ -56,7 +56,7 @@ PullFileEventHandler::PullFileEventHandler(BufferedSocket& bufSocket,
     PRInt64 seekBytes = PR_Seek64(mFile, start, PR_SEEK_SET);
     if (seekBytes == -1)
     {
-      mBufSocket.write(agentWarn("failed to seek"));
+      pullError("failed to seek");
       close();
       return;
     }
@@ -76,6 +76,16 @@ PullFileEventHandler::PullFileEventHandler(BufferedSocket& bufSocket,
 PullFileEventHandler::~PullFileEventHandler()
 {
   delete[] mTmpBuf;
+}
+
+
+void
+PullFileEventHandler::pullError(std::string err)
+{
+  std::ostringstream out, errout;
+  errout << mPath << ",-1";
+  out << agentWarn(errout.str()) << ENDL << err << ENDL;
+  mBufSocket.write(out.str());
 }
 
 

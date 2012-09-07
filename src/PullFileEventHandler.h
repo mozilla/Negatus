@@ -32,6 +32,8 @@ private:
   PRUint64 mBytesRead;
   PRUint64 mSize;
   char* mTmpBuf;
+
+  void pullError(std::string err);
 };
 
 #endif
