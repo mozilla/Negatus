@@ -161,20 +161,8 @@ CommandEventHandler::handleLine(std::string line)
     result = exec(cl.args);
   else if (cl.cmd.compare("hash") == 0)
     result = hash(cl.args);
-  else if (cl.cmd.compare("id") == 0)
-    result = id(cl.args);
-  else if (cl.cmd.compare("os") == 0)
-    result = os(cl.args);
-  else if (cl.cmd.compare("systime") == 0)
-    result = systime(cl.args);
-  else if (cl.cmd.compare("uptime") == 0)
-    result = uptime(cl.args);
-  else if (cl.cmd.compare("screen") == 0)
-    result = screen(cl.args);
-  else if (cl.cmd.compare("memory") == 0)
-    result = memory(cl.args);
-  else if (cl.cmd.compare("power") == 0)
-    result = power(cl.args);
+  else if (cl.cmd.compare("info") == 0)
+    result = info(cl.args);
   else if (cl.cmd.compare("ps") == 0)
     result = ps(cl.args);
   else if (cl.cmd.compare("pull") == 0)
@@ -237,7 +225,9 @@ CommandEventHandler::readTextFile(std::string path)
     output << std::string(buffer);
 
   fclose(fp);
-  return output.str();
+  std::string str = output.str();
+  str.erase(str.size() - 1);
+  return str;
 }
 
 
@@ -454,7 +444,31 @@ CommandEventHandler::hash(std::vector<std::string>& args)
 
 
 std::string
-CommandEventHandler::id(std::vector<std::string>& args)
+CommandEventHandler::info(std::vector<std::string>& args)
+{
+  if (args.size() != 1)
+    return agentWarnInvalidNumArgs(1);
+  if (args[0].compare("id") == 0)
+    return id();
+  else if (args[0].compare("os") == 0)
+    return os();
+  else if (args[0].compare("systime") == 0)
+    return systime();
+  else if (args[0].compare("uptime") == 0)
+    return uptime();
+  else if (args[0].compare("uptimemillis") == 0)
+    return uptimemillis();
+  else if (args[0].compare("screen") == 0)
+    return screen();
+  else if (args[0].compare("memory") == 0)
+    return memory();
+  else if (args[0].compare("power") == 0)
+    return power();
+  return agentWarn("Invalid info subcommand.");
+}
+
+std::string
+CommandEventHandler::id()
 {
   std::string interfaces[3] = {"wlan0", "usb0", "lo"};
   FILE *iface;
@@ -468,6 +482,7 @@ CommandEventHandler::id(std::vector<std::string>& args)
       continue;
 
     fgets(buffer, BUFSIZE, iface);
+    buffer[strlen(buffer) - 1] = '\0'; // remove extra newline
     fclose(iface);
 
     return std::string(buffer);
@@ -477,7 +492,7 @@ CommandEventHandler::id(std::vector<std::string>& args)
 
 
 std::string
-CommandEventHandler::os(std::vector<std::string>& args)
+CommandEventHandler::os()
 {
   // not really supported yet. Best we could do is
   // cat /system/sources.xml | grep gaia and another grep for m-c
@@ -486,7 +501,7 @@ CommandEventHandler::os(std::vector<std::string>& args)
 
 
 std::string
-CommandEventHandler::systime(std::vector<std::string>& args)
+CommandEventHandler::systime()
 {
   PRTime now = PR_Now();
   PRExplodedTime ts;
@@ -502,25 +517,36 @@ CommandEventHandler::systime(std::vector<std::string>& args)
 
 // need to figure a better way
 std::string
-CommandEventHandler::uptime(std::vector<std::string>& args)
+CommandEventHandler::uptime()
 {
   return getCmdOutput("uptime");
 }
 
 
-// TODO uptimimilis
+// this is not cross platform
+std::string
+CommandEventHandler::uptimemillis()
+{
+  std::string uptime_file = readTextFile("/proc/uptime");
+  double uptime;
+  sscanf(&uptime_file[0], "%lf", &uptime);
+  uptime *= 1000;
+  std::ostringstream out;
+  out << (int) uptime;
+  return out.str();
+}
 // TODO rotation
 
 // need to figure a better way
 std::string
-CommandEventHandler::screen(std::vector<std::string>& args)
+CommandEventHandler::screen()
 {
   return readTextFile("/sys/devices/virtual/graphics/fb0/modes");
 }
 
 
 std::string
-CommandEventHandler::memory(std::vector<std::string>& args)
+CommandEventHandler::memory()
 {
   FILE *meminfo = fopen("/proc/meminfo", "r");
   if (!meminfo)
@@ -535,13 +561,13 @@ CommandEventHandler::memory(std::vector<std::string>& args)
   fgets(buffer, BUFSIZE, meminfo);
   sscanf(buffer + getFirstIntPos(buffer, BUFSIZE), "%u", &available);
 
-  sprintf(buffer, "Total: %d; Available: %d.\n", total * 1000, available * 1000);
+  sprintf(buffer, "Total: %d; Available: %d.", total * 1000, available * 1000);
   return std::string(buffer);
 }
 
 
 std::string
-CommandEventHandler::power(std::vector<std::string>& args)
+CommandEventHandler::power()
 {
   std::ostringstream ret;
 

@@ -50,26 +50,29 @@ private:
   std::string dirw(std::vector<std::string>& args);
   std::string exec(std::vector<std::string>& args);
   std::string hash(std::vector<std::string>& args);
-  std::string id(std::vector<std::string>& args);
   std::string isDir(std::vector<std::string>& args);
   std::string isDir(std::string path);
+  std::string info(std::vector<std::string>& args);
   std::string ls(std::vector<std::string>& args);
-  std::string memory(std::vector<std::string>& args);
   std::string mkdr(std::vector<std::string>& args);
-  std::string os(std::vector<std::string>& args);
-  std::string power(std::vector<std::string>& args);
   std::string ps(std::vector<std::string>& args);
   std::string pull(std::vector<std::string>& args);
   std::string push(std::vector<std::string>& args);
   std::string quit(std::vector<std::string>& args);
-  std::string screen(std::vector<std::string>& args);
-  std::string systime(std::vector<std::string>& args);
   std::string rm(std::vector<std::string>& args);
   std::string rm(std::string path);
   std::string rmdr(std::vector<std::string>& args);
   std::string testroot(std::vector<std::string>& args);
-  std::string uptime(std::vector<std::string>& args);
   std::string ver(std::vector<std::string>& args);
+
+  std::string id();
+  std::string memory();
+  std::string os();
+  std::string power();
+  std::string screen();
+  std::string uptime();
+  std::string uptimemillis();
+  std::string systime();
 };
 
 #endif

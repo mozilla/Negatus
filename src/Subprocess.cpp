@@ -31,7 +31,7 @@ getCmdOutput(std::string cmd)
 
   while (fgets(buffer, BUFSIZE, fp))
     output += std::string(buffer);
-
+  output.erase(output.size() - 1); // remove the last extra newline
   pclose(fp);
   return output;
 }
