@@ -4,6 +4,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 #include "Subprocess.h"
 #include <iostream>
+#include <sstream>
 #include <stdio.h>
 
 FILE*
@@ -27,11 +28,13 @@ getCmdOutput(std::string cmd)
   if (!fp)
     return "";
   char buffer[BUFSIZE];
-  std::string output;
+  std::ostringstream output;
 
   while (fgets(buffer, BUFSIZE, fp))
-    output += std::string(buffer);
-  output.erase(output.size() - 1); // remove the last extra newline
+    output << std::string(buffer);
   pclose(fp);
-  return output;
+
+  std::string str = output.str();
+  str.erase(str.size() - 1); // remove the last extra newline
+  return str;
 }
