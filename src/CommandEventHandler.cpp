@@ -122,8 +122,6 @@ CommandEventHandler::handleEvent(PRPollDesc desc)
       }
       std::string line(trim(buf.str()));
       handleLine(line);
-      if (!mBufSocket.sendClosed() && !mDataEventHandler)
-        sendPrompt();
     }
 
     if (noMoreToRead)
@@ -199,10 +197,15 @@ CommandEventHandler::handleLine(std::string line)
     result = testroot(cl.args);
   else if (cl.cmd.compare("ver") == 0)
     result = ver(cl.args);
-  if (!result.empty() && !mBufSocket.sendClosed())
+  if (!mBufSocket.sendClosed() && !mDataEventHandler)
   {
-    mBufSocket.write(result);
-    mBufSocket.write(ENDL);
+    // FIXME: It appears that DeviceManager will get confused if
+    // the prompt isn't sent with the response for some commands.
+    // I think this is a bug in DeviceManager, but it needs to be
+    // further investigated.
+    result += std::string(ENDL);
+    result += mPrompt;
+    mBufSocket.write(result.c_str(), result.size() + 1);
   }
 }
 
