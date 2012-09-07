@@ -38,6 +38,7 @@ PullFileEventHandler::PullFileEventHandler(BufferedSocket& bufSocket,
     close();
     return;
   }
+
   PRFileInfo fileInfo;
   if (PR_GetOpenFileInfo(mFile, &fileInfo) != PR_SUCCESS)
   {
@@ -45,12 +46,16 @@ PullFileEventHandler::PullFileEventHandler(BufferedSocket& bufSocket,
     close();
     return;
   }
+
   if (fileInfo.size <= start)
   {
-    pullError("start position is at or past end of file");
-    close();
-    return;
+    // we don't error out; we just don't return any data
+    start = 0;
+    mSize = 0;
   }
+  else if (mSize == 0)
+    mSize = fileInfo.size - start;
+
   if (start > 0)
   {
     PRInt64 seekBytes = PR_Seek64(mFile, start, PR_SEEK_SET);
@@ -62,14 +67,14 @@ PullFileEventHandler::PullFileEventHandler(BufferedSocket& bufSocket,
     }
   }
   
-  if (mSize == 0)
-    mSize = fileInfo.size - start;
 
   if (!includeHeader)
     return;
   std::stringstream out;
   out << path << "," << mSize << ENDL;  
   mBufSocket.write(out.str());
+  if (mSize == 0)
+    close();
 }
 
 
