@@ -35,6 +35,7 @@ getCmdOutput(std::string cmd)
   pclose(fp);
 
   std::string str = output.str();
-  str.erase(str.size() - 1); // remove the last extra newline
+  if (str.size())
+    str.erase(str.size() - 1); // remove the last extra newline
   return str;
 }

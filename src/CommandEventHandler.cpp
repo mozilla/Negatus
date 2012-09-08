@@ -226,7 +226,8 @@ CommandEventHandler::readTextFile(std::string path)
 
   fclose(fp);
   std::string str = output.str();
-  str.erase(str.size() - 1);
+  if (str.size())
+    str.erase(str.size() - 1);
   return str;
 }
 
@@ -674,7 +675,10 @@ CommandEventHandler::ls(std::vector<std::string>& args)
   if (PR_CloseDir(dir) != PR_SUCCESS)
     return agentWarn("could not close dir object");
 
-  return out.str();
+  std::string output = out.str();
+  if (output.size())
+    output.erase(output.size() - 1); // erase the extra newline
+  return output;
 }
 
 
