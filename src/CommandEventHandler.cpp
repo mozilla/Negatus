@@ -586,14 +586,7 @@ std::string
 CommandEventHandler::ps(std::vector<std::string>& args)
 {
   // might need to change command on linux since the output is different on B2G
-  FILE *p = checkPopen("ps | tr -s \" \" | cut -d' ' -f1,2,9 | tail +2", "r");
-  std::ostringstream ret;
-  char buffer[BUFSIZE];
-
-  while (fgets(buffer, BUFSIZE, p))
-    ret << buffer;
-
-  return ret.str();
+  return getCmdOutput("ps | tr -s \" \" | cut -d' ' -f1,2,9 | tail +2");
 }
 
 
