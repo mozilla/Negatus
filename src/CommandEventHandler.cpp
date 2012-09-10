@@ -337,6 +337,13 @@ CommandEventHandler::exec(std::vector<std::string>& args)
   if (args.size() < 1)
     return agentWarn("command not specified");
 
+  // delete double quotes from args[0], easier to parse
+  if (args[0][0] == '"')
+  {
+    args[0].erase(0, 1); // delete the beginning one
+    args[0].erase(args[0].size() - 1); // delete the ending one
+  }
+
   std::vector<std::string>::iterator argi = args.begin();
 
   // handle first part separately, check if we have env vars
