@@ -781,5 +781,5 @@ CommandEventHandler::testroot(std::vector<std::string>& args)
 std::string
 CommandEventHandler::ver(std::vector<std::string>& args)
 {
-  return std::string("SUTAgentAndroid Version 1.00");
+  return std::string("SUTAgentAndroid Version 1.13");
 }
