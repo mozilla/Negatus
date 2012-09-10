@@ -348,6 +348,7 @@ CommandEventHandler::exec(std::vector<std::string>& args)
   {
     char envVarStr[(*argi).size() + 1];
     (*argi).copy(envVarStr, (*argi).size());
+    envVarStr[(*argi).size()] = 0;
     char *r_env;
     char *env = strtok_r(envVarStr, ",", &r_env);
     // now we have something like env1=val1
