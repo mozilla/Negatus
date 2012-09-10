@@ -14,8 +14,6 @@ class EventHandler;
 
 class Reactor {
 public:
-  Reactor();
-
   /** Register an EventHandler with the Reactor.
    * Registering causes the Reactor to call getPollDescs()
    * on the handler and to delete the handler if it is
@@ -42,6 +40,8 @@ private:
 
     bool expired();
   };
+
+  Reactor();
 
   std::vector<EventHandler*> mEvtHandlers;
   std::vector<Timeout> mTimeouts;
