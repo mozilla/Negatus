@@ -160,5 +160,6 @@ int main(int argc, char **argv)
   while (!wantToDie)
     reactor->run();
   reactor->stop();
+  logger->log("Negatus shutting down.");
   return 0;
 }
