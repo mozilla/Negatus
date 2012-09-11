@@ -10,6 +10,10 @@
 #include "BufferedSocket.h"
 #include "EventHandler.h"
 
+
+#define TESTROOT "/data/local"
+
+
 class CommandEventHandler: public EventHandler
 {
 public:

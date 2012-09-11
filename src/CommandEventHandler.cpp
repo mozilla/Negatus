@@ -776,7 +776,7 @@ CommandEventHandler::do_rmdr(std::string path, std::ostringstream &out)
 std::string
 CommandEventHandler::testroot(std::vector<std::string>& args)
 {
-  return std::string("/data/local");
+  return std::string(TESTROOT);
 }
 
 
