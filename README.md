@@ -40,8 +40,8 @@ Add a `sutagent &` line after the exports in
 *$B2G_REPO/gonk-misc/b2g.sh*.
 
 # NSPR Logging
-Before running the agent:
+Before running the agent (not necessary if you use `run.sh`):
 
 `export NSPR_LOG_MODULES="NegatusLOG:5, timestamp"`
 
-Data will be logged to `Negatus.log`.
+Data will be logged to `$TESTROOT/Negatus.log`.
