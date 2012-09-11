@@ -12,6 +12,7 @@ PRLogModuleInfo* Logger::logModule = NULL;
 Logger::Logger()
 {
   logModule = PR_NewLogModule("NegatusLOG");
+  PR_SetLogFile("Negatus.log");
   PR_LOG(logModule, PR_LOG_ALWAYS, ("NegatusLOG init.\n"));
 }
 

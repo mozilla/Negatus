@@ -44,4 +44,4 @@ Before running the agent:
 
 `export NSPR_LOG_MODULES="NegatusLOG:5, timestamp"`
 
-`export NSPR_LOG_FILE=/path/to/log/file`
+Data will be logged to `Negatus.log`.
