@@ -6,6 +6,28 @@
 #include <map>
 #include "EventHandler.h"
 
+Reactor::Timeout::Timeout(PRIntervalTime _epoch, PRIntervalTime _interval,
+  EventHandler* _evtHandler)
+  : epoch(_epoch), interval(_interval), evtHandler(_evtHandler)
+{
+}
+
+
+Reactor::Timeout::Timeout(const Timeout& t)
+  : epoch(t.epoch), interval(t.interval), evtHandler(t.evtHandler)
+{
+}
+
+
+Reactor::Timeout&
+Reactor::Timeout::operator=(const Timeout& rhs)
+{
+  epoch = rhs.epoch;
+  interval = rhs.interval;
+  evtHandler = rhs.evtHandler;
+}
+
+
 bool
 Reactor::Timeout::expired()
 {
@@ -106,19 +128,22 @@ Reactor::run()
   std::vector<EventHandler*> expiredHandlers;
 
   for (std::vector<Timeout>::iterator i = mTimeouts.begin();
-       i != mTimeouts.end(); i++)
+       i != mTimeouts.end(); )
   {
     if ((*i).expired())
     {
       expiredHandlers.push_back((*i).evtHandler);
-      mTimeouts.erase(i);
-      i = mTimeouts.begin();
+      i = mTimeouts.erase(i);
     }
+    else
+      ++i;
   }
 
   for (std::vector<EventHandler*>::iterator i = expiredHandlers.begin();
        i != expiredHandlers.end(); i++)
+  {
     (*i)->handleTimeout();
+  }
 
   deleteClosed();
 }
@@ -132,7 +157,7 @@ Reactor::stop()
   {
     (*i)->close();
     delete (*i);
-    mEvtHandlers.erase(i);
+    i = mEvtHandlers.erase(i);
   }
 }
 
@@ -140,10 +165,7 @@ Reactor::stop()
 void
 Reactor::setTimeout(PRIntervalTime interval, EventHandler* evtHandler)
 {
-  Timeout t;
-  t.epoch = PR_IntervalNow();
-  t.interval = interval;
-  t.evtHandler = evtHandler;
+  Timeout t(PR_IntervalNow(), interval, evtHandler);
   mTimeouts.push_back(t);
 }
 
@@ -152,23 +174,23 @@ void
 Reactor::deleteClosed()
 {
   for (std::vector<EventHandler*>::iterator i = mEvtHandlers.begin();
-       i != mEvtHandlers.end(); i++)
+       i != mEvtHandlers.end(); )
   {
     if ((*i)->closed())
     {
       EventHandler* hdlr = *i;
-      mEvtHandlers.erase(i);
-      i = mEvtHandlers.begin();
+      i = mEvtHandlers.erase(i);
       for (std::vector<Timeout>::iterator j = mTimeouts.begin();
-           j != mTimeouts.end(); j++)
+           j != mTimeouts.end(); )
       {
         if ((*j).evtHandler == hdlr)
-        {
-          mTimeouts.erase(j);
-          j = mTimeouts.begin();
-        }
+          j = mTimeouts.erase(j);
+        else
+          ++j;
       }
       delete hdlr;
     }
+    else
+      ++i;
   }
 }

@@ -38,6 +38,11 @@ private:
     PRIntervalTime interval;
     EventHandler* evtHandler;
 
+    Timeout(PRIntervalTime _epoch, PRIntervalTime _interval,
+            EventHandler* _evtHandler);
+    Timeout(const Timeout& t);
+    Timeout& operator=(const Timeout& rhs);
+
     bool expired();
   };
 

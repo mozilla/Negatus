@@ -22,6 +22,7 @@ public:
   virtual void close();
   virtual void getPollDescs(std::vector<PRPollDesc>& descs);
   virtual void handleEvent(PRPollDesc desc);
+  virtual void handleTimeout();
   virtual std::string name() { return "CommandEventHandler"; }
 
   void handleLine(std::string line);

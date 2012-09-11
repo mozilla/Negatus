@@ -17,7 +17,8 @@ SRCS=\
 	src/SocketAcceptor.cpp \
 	src/Strings.cpp \
 	src/SUTAgent.cpp \
-	src/Subprocess.cpp
+	src/Subprocess.cpp \
+	src/SubprocessEventHandler.cpp
 
 OBJS=$(subst .cpp,.o,$(SRCS))
 
