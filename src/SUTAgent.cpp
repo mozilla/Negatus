@@ -16,6 +16,7 @@
 #include <prtime.h>
 #include <prtypes.h>
 
+#include "Logger.h"
 #include "Strings.h"
 #include "Reactor.h"
 #include "SocketAcceptor.h"
@@ -154,6 +155,7 @@ int main(int argc, char **argv)
   handle_reboot(query);
 
   Reactor* reactor = Reactor::instance();
+  Logger *logger = Logger::instance();
 
   while (!wantToDie)
     reactor->run();

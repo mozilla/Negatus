@@ -8,6 +8,7 @@ SRCS=\
 	src/CommandEventHandler.cpp \
 	src/EventHandler.cpp \
 	src/Hash.cpp \
+	src/Logger.cpp \
 	src/Logging.cpp \
 	src/PullFileEventHandler.cpp \
 	src/PushFileEventHandler.cpp \

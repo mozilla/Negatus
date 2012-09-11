@@ -38,3 +38,8 @@ in the $PATH.
 
 Add a `sutagent &` line after the exports in
 *$B2G_REPO/gonk-misc/b2g.sh*.
+
+# NSPR Logging
+Before running the agent:
+`export NSPR_LOG_MODULES=NegatusLOG:5`
+`export NSPR_LOG_FILE=/path/to/log/file`
