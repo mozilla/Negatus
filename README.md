@@ -36,8 +36,10 @@ in the $PATH.
 
 # Start the agent on boot
 
-Add a `sutagent &` line after the exports in
-*$B2G_REPO/gonk-misc/b2g.sh*.
+Insert this after the exports in *$B2G_REPO/gonk-misc/b2g.sh*:
+
+    export NSPR_LOG_MODULES="NegatusLOG:5, timestamp"
+    sutagent &
 
 # NSPR Logging
 Before running the agent (not necessary if you use `run.sh`):
