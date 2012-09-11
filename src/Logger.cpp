@@ -22,3 +22,8 @@ Logger::instance()
         mInstance = new Logger();
     return mInstance;
 }
+
+void
+Logger::log(std::string msg) {
+  PR_LOG(logModule, PR_LOG_ALWAYS, (msg.c_str()));
+}

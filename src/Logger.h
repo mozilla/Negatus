@@ -7,9 +7,12 @@
 
 #include <prlog.h>
 
+#include <string>
+
 class Logger {
   public:
     static Logger* instance();
+    void log(std::string msg);
 
   private:
     static Logger* mInstance;

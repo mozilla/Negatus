@@ -4,6 +4,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 #include "CommandEventHandler.h"
 #include "Hash.h"
+#include "Logger.h"
 #include "Logging.h"
 #include "PullFileEventHandler.h"
 #include "PushFileEventHandler.h"
@@ -143,6 +144,7 @@ CommandEventHandler::handleEvent(PRPollDesc desc)
 void
 CommandEventHandler::handleLine(std::string line)
 {
+  Logger::instance()->log("Recvd line: " + line);
   CommandLine cl(line);
   if (cl.cmd.empty())
     return;
