@@ -6,8 +6,11 @@ SRCS=\
 	src/Buffer.cpp \
 	src/BufferedSocket.cpp \
 	src/CommandEventHandler.cpp \
+	src/CommandEventHandlerFactory.cpp \
 	src/EventHandler.cpp \
 	src/Hash.cpp \
+	src/HeartbeatEventHandlerFactory.cpp \
+	src/HeartbeatEventHandler.cpp \
 	src/Logger.cpp \
 	src/Logging.cpp \
 	src/PullFileEventHandler.cpp \

@@ -6,12 +6,13 @@
 #define negatus_socket_acceptor_h
 
 #include "EventHandler.h"
+#include "EventHandlerFactory.h"
 #include <prio.h>
 
 
 class SocketAcceptor: public EventHandler {
 public:
-  SocketAcceptor();
+  SocketAcceptor(EventHandlerFactory* handlerFactory);
 
   virtual void close();
 
@@ -22,6 +23,7 @@ public:
 
 private:
   PRFileDesc* mSocket;
+  EventHandlerFactory* handlerFactory;
 };
 
 #endif

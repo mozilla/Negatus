@@ -16,6 +16,8 @@
 #include <prtime.h>
 #include <prtypes.h>
 
+#include "CommandEventHandlerFactory.h"
+#include "HeartbeatEventHandlerFactory.h"
 #include "Logger.h"
 #include "Strings.h"
 #include "Reactor.h"
@@ -124,12 +126,26 @@ int main(int argc, char **argv)
   if (optionError)
     return 1;
 
-  SocketAcceptor* acceptor = new SocketAcceptor();
+  EventHandlerFactory* cmdFact = new CommandEventHandlerFactory();
+  SocketAcceptor* acceptor = new SocketAcceptor(cmdFact);
   PRNetAddr acceptorAddr;
   PR_InitializeNetAddr(PR_IpAddrAny, port, &acceptorAddr);
   std::cout << "listening on " << addrStr(acceptorAddr) << std::endl;
   PRStatus status = acceptor->listen(acceptorAddr);
   if (status == PR_FAILURE)
+  {
+    std::cerr << "Failure to open socket: " << PR_GetError() << std::endl;
+    return 1;
+  }
+
+  // thump!
+  EventHandlerFactory* thumpFact = new HeartbeatEventHandlerFactory();
+  SocketAcceptor* acceptor2 = new SocketAcceptor(cmdFact);
+  PRNetAddr acceptorAddr2;
+  PR_InitializeNetAddr(PR_IpAddrAny, 20700, &acceptorAddr2);
+  std::cout << "thump on " << addrStr(acceptorAddr2) << std::endl;
+  PRStatus status2 = acceptor2->listen(acceptorAddr2);
+  if (status2 == PR_FAILURE)
   {
     std::cerr << "Failure to open socket: " << PR_GetError() << std::endl;
     return 1;
