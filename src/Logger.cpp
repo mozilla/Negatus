@@ -4,7 +4,7 @@
 * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #define DEBUG
-#include "Shell.h"
+#include "CommandEventHandler.h"
 #include "Logger.h"
 
 #include <string>
