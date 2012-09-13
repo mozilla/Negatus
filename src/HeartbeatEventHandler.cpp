@@ -7,6 +7,7 @@
 #include "Strings.h"
 #include "Subprocess.h"
 
+#include <stdio.h>
 #include <prinrval.h>
 #include <prtime.h>
 

@@ -40,6 +40,7 @@ private:
   bool checkDataEventHandler(PRPollDesc desc);
 
   std::string cat(std::vector<std::string>& args);
+  std::string exec(std::vector<std::string>& args);
   std::string pull(std::vector<std::string>& args);
   std::string push(std::vector<std::string>& args);
   std::string quit(std::vector<std::string>& args);
