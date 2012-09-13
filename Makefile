@@ -17,6 +17,7 @@ SRCS=\
 	src/PushFileEventHandler.cpp \
 	src/Reactor.cpp \
 	src/Registration.cpp \
+	src/Shell.cpp \
 	src/SocketAcceptor.cpp \
 	src/Strings.cpp \
 	src/SUTAgent.cpp \

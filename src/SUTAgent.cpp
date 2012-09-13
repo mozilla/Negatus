@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 
   // thump!
   EventHandlerFactory* thumpFact = new HeartbeatEventHandlerFactory();
-  SocketAcceptor* acceptor2 = new SocketAcceptor(cmdFact);
+  SocketAcceptor* acceptor2 = new SocketAcceptor(thumpFact);
   PRNetAddr acceptorAddr2;
   PR_InitializeNetAddr(PR_IpAddrAny, 20700, &acceptorAddr2);
   std::cout << "thump on " << addrStr(acceptorAddr2) << std::endl;

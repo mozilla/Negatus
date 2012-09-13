@@ -19,6 +19,7 @@ public:
   virtual void close();
   virtual void handleEvent(PRPollDesc desc);
   virtual void handleTimeout();
+  virtual void getPollDescs(std::vector<PRPollDesc>& descs);
   virtual std::string name() { return "HeartbeatEventHandler"; }
 
 
