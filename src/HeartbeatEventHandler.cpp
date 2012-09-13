@@ -79,10 +79,7 @@ HeartbeatEventHandler::handleEvent(PRPollDesc desc)
   }
 
   if (mBufSocket.recvClosed())
-  {
     close();
-    return;
-  }
 }
 
 
