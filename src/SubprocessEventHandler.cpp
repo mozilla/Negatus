@@ -2,16 +2,20 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
+#include "BufferedSocket.h"
+#include "CommandEventHandler.h"
+#include "Logging.h"
+#include "Reactor.h"
 #include "SubprocessEventHandler.h"
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "BufferedSocket.h"
-#include "CommandEventHandler.h"
-#include "Logging.h"
-#include "Reactor.h"
+
+#include <string>
+#include <sstream>
 
 #define SUBPROCESS_BUFFER_SIZE 1024
 
@@ -69,7 +73,14 @@ void
 SubprocessEventHandler::close()
 {
   if (mP)
-    pclose(mP);
+  {
+   int ret = pclose(mP);
+   // send back the return code
+   std::ostringstream retcode;
+   retcode << "return code [" << ret << "]" << std::endl;
+   std::string msg = retcode.str();
+   mBufSocket.write(msg.c_str(), msg.length());
+  }
   EventHandler::close();
 }
 
