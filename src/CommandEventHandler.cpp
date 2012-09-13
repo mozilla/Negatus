@@ -10,6 +10,7 @@
 #include "PushFileEventHandler.h"
 #include "Strings.h"
 #include "Subprocess.h"
+#include "SubprocessEventHandler.h"
 
 #include <dirent.h>
 #include <stdint.h>
@@ -94,6 +95,20 @@ CommandEventHandler::checkDataEventHandler(PRPollDesc desc)
     return true;
   }
   return false;
+}
+
+
+void
+CommandEventHandler::handleTimeout()
+{
+  if (mDataEventHandler && !mDataEventHandler->closed())
+    mDataEventHandler->handleTimeout();
+  if (mDataEventHandler->closed())
+  {
+    delete mDataEventHandler;
+    mDataEventHandler = NULL;
+    sendPrompt();
+  }
 }
 
 
@@ -337,7 +352,7 @@ std::string
 CommandEventHandler::exec(std::vector<std::string>& args)
 {
   if (args.size() < 1)
-    return agentWarn("command not specified");
+    return agentWarnInvalidNumArgs(1);
 
   // delete double quotes from args[0], easier to parse
   if (args[0][0] == '"')
@@ -351,11 +366,12 @@ CommandEventHandler::exec(std::vector<std::string>& args)
   // handle first part separately, check if we have env vars
   bool envs = args[0].find('=') != std::string::npos;
 
-  std::vector<std::string> env_names, env_values;
+  std::vector<std::string> envNames, envValues;
   // if we have envs we have to handle them separately
   if (envs)
   {
     char envVarStr[(*argi).size() + 1];
+    envVarStr[(*argi).size()] = 0;
     (*argi).copy(envVarStr, (*argi).size());
     envVarStr[(*argi).size()] = 0;
     char *r_env;
@@ -377,8 +393,8 @@ CommandEventHandler::exec(std::vector<std::string>& args)
         continue;
 
       std::string var(env, pos), val(env + pos + 1);
-      env_names.push_back(var);
-      env_values.push_back(val);
+      envNames.push_back(var);
+      envValues.push_back(val);
 
       env = strtok_r(NULL, ",", &r_env);
     }
@@ -390,49 +406,21 @@ CommandEventHandler::exec(std::vector<std::string>& args)
   std::string prog(*argi++);
 
   // what remains are the args
-
-  // set the env vars and backup the old vals
-  std::vector<std::string> backup;
-  for (int i = 0; i < env_names.size(); ++i)
-  {
-    const char *name = env_names[i].c_str();
-    char *old = getenv(name);
-    if (!old)
-      backup.push_back("");
-    else
-      backup.push_back(std::string(old));
-    setenv(name, env_values[i].c_str(), 1);
-  }
-
   std::ostringstream to_exec;
-  to_exec << prog << " ";
+  to_exec << prog;
   for (; argi != args.end(); ++argi)
-    to_exec << *argi << " ";
+    to_exec << " " << *argi;
 
-  FILE *p = checkPopen(to_exec.str(), "r");
-
-  // get the output so pclose won't cry even on successful calls
-  char buffer[BUFSIZE];
-  std::ostringstream output;
-
-  while (fgets(buffer, BUFSIZE, p))
-    output << std::string(buffer);
-
-  int status = pclose(p);
-
-  // restore the env
-  for (int i = 0; i < env_names.size(); ++i)
+  mDataEventHandler = new SubprocessEventHandler(mBufSocket, *this,
+                                                 to_exec.str(), envNames,
+                                                 envValues);
+  if (mDataEventHandler->closed())
   {
-    const char *name = env_names[i].c_str();
-    if (backup[i].size() == 0)
-      unsetenv(name);
-    else
-      setenv(name, backup[i].c_str(), 1);
+    delete mDataEventHandler;
+    mDataEventHandler = NULL;
+    return agentWarn("failed to launch process");
   }
-
-  if (status == 0)
-    return std::string("success");
-  return agentWarn("error");
+  return "";
 }
 
 
