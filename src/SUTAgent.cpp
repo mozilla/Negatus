@@ -4,6 +4,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <iostream>
 
@@ -62,6 +63,7 @@ PRErrorCode send_query(std::string query, std::string ip, PRUint32 port)
   return 0;
 }
 
+
 void handle_reboot(std::string query)
 {
   FILE *rebt = fopen("/data/local/agent_rebt.txt", "r");
@@ -79,12 +81,30 @@ void handle_reboot(std::string query)
   }
 }
 
+
 dict get_reg_data()
 {
   dict data;
   data["NAME"] = "SUTAgent";
   return data;
 }
+
+
+void setUpAcceptor(EventHandlerFactory* fact, std::string kind, PRInt16 port,
+    PRNetAddr& acceptorAddr)
+{
+  SocketAcceptor* acceptor = new SocketAcceptor(fact);
+  PR_InitializeNetAddr(PR_IpAddrAny, port, &acceptorAddr);
+  std::cout << kind << " handler ";
+  std::cout << "listening on " << addrStr(acceptorAddr) << std::endl;
+  PRStatus status = acceptor->listen(acceptorAddr);
+  if (status == PR_FAILURE)
+  {
+    std::cerr << "Failure to open socket: " << PR_GetError() << std::endl;
+    exit(1);
+  }
+}
+
 
 int main(int argc, char **argv)
 {
@@ -126,33 +146,13 @@ int main(int argc, char **argv)
   if (optionError)
     return 1;
 
-  EventHandlerFactory* cmdFact = new CommandEventHandlerFactory();
-  SocketAcceptor* acceptor = new SocketAcceptor(cmdFact);
-  PRNetAddr acceptorAddr;
-  PR_InitializeNetAddr(PR_IpAddrAny, port, &acceptorAddr);
-  std::cout << "listening on " << addrStr(acceptorAddr) << std::endl;
-  PRStatus status = acceptor->listen(acceptorAddr);
-  if (status == PR_FAILURE)
-  {
-    std::cerr << "Failure to open socket: " << PR_GetError() << std::endl;
-    return 1;
-  }
-
-  // thump!
-  EventHandlerFactory* thumpFact = new HeartbeatEventHandlerFactory();
-  SocketAcceptor* acceptor2 = new SocketAcceptor(thumpFact);
-  PRNetAddr acceptorAddr2;
-  PR_InitializeNetAddr(PR_IpAddrAny, 20700, &acceptorAddr2);
-  std::cout << "thump on " << addrStr(acceptorAddr2) << std::endl;
-  PRStatus status2 = acceptor2->listen(acceptorAddr2);
-  if (status2 == PR_FAILURE)
-  {
-    std::cerr << "Failure to open socket: " << PR_GetError() << std::endl;
-    return 1;
-  }
+  PRNetAddr cmdAddr, heartbeatAddr;
+  setUpAcceptor(new CommandEventHandlerFactory(), "Command", port, cmdAddr);
+  setUpAcceptor(new HeartbeatEventHandlerFactory(), "Heartbeat", 20700,
+      heartbeatAddr);
 
   dict reg_data = get_reg_data();
-  reg_data["IPADDR"] = addrStr(acceptorAddr);
+  reg_data["IPADDR"] = addrStr(cmdAddr);
   std::string query = gen_query_url(reg_data);
   std::cout << "Query url: " << query << std::endl;
 

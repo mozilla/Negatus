@@ -5,10 +5,13 @@
 #ifndef negatus_heartbeat_event_handler_h
 #define negatus_heartbeat_event_handler_h
 
-#include <prio.h>
-#include <sstream>
 #include "BufferedSocket.h"
 #include "EventHandler.h"
+
+#include <prio.h>
+
+#include <string>
+#include <sstream>
 
 
 class HeartbeatEventHandler: public EventHandler
@@ -26,7 +29,9 @@ public:
 private:
   BufferedSocket mBufSocket;
 
+  std::string timestamp();
   void sendThump();
+  void sendTraceOutput();
 };
 
 #endif

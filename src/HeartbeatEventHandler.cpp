@@ -5,8 +5,10 @@
 #include "HeartbeatEventHandler.h"
 #include "Shell.h"
 #include "Strings.h"
+#include "Subprocess.h"
 
 #include <prinrval.h>
+#include <prtime.h>
 
 #include <iostream>
 #include <string>
@@ -19,7 +21,7 @@ HeartbeatEventHandler::HeartbeatEventHandler(PRFileDesc* socket)
   : mBufSocket(socket)
 {
   registerWithReactor();
-  sendThump();
+  sendTraceOutput();
   setTimeout(PR_SecondsToInterval(TIMEOUT));
 }
 
@@ -90,15 +92,38 @@ HeartbeatEventHandler::handleTimeout()
   setTimeout(PR_SecondsToInterval(TIMEOUT));
 }
 
+std::string
+HeartbeatEventHandler::timestamp()
+{
+  PRTime now = PR_Now();
+  PRExplodedTime ts;
+  PR_ExplodeTime(now, PR_LocalTimeParameters, &ts);
+
+  char buffer[BUFSIZE];
+  sprintf(buffer, "%d%02d%02d-%02d:%02d:%02d", ts.tm_year, ts.tm_month,
+    ts.tm_mday, ts.tm_hour, ts.tm_min, ts.tm_sec);
+
+  return std::string(buffer);
+}
+
 
 void
 HeartbeatEventHandler::sendThump()
 {
-  // devmgrSUT.py expects NULL terminated str
   std::ostringstream msg;
-  msg << systime() << " Thump thump - " << id() << ENDL;
+  msg << timestamp() << " Thump thump - " << id() << ENDL;
   std::string thump = msg.str();
+  // devmgrSUT.py expects NULL terminated str
   mBufSocket.write(thump.c_str(), thump.size() + 1);
 }
 
 
+void
+HeartbeatEventHandler::sendTraceOutput()
+{
+  std::ostringstream msg;
+  msg << timestamp() << " trace output" << ENDL;
+  std::string output = msg.str();
+  // devmgrSUT.py expects NULL terminated str
+  mBufSocket.write(output.c_str(), output.size() + 1);
+}
