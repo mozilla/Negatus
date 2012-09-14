@@ -6,6 +6,7 @@
 #include "Subprocess.h"
 
 #include <stdio.h>
+#include <string.h>
 
 std::string
 id()

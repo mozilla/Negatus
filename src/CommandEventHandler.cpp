@@ -751,3 +751,10 @@ CommandEventHandler::ver(std::vector<std::string>& args)
 {
   return std::string("SUTAgentAndroid Version 1.13");
 }
+
+
+EventHandler*
+CommandEventHandlerFactory::createEventHandler(PRFileDesc* socket)
+{
+  return new CommandEventHandler(socket);
+}

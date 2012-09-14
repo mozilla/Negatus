@@ -5,7 +5,6 @@
 #include "HeartbeatEventHandler.h"
 #include "Shell.h"
 #include "Strings.h"
-#include "Subprocess.h"
 
 #include <stdio.h>
 #include <prinrval.h>
@@ -86,8 +85,8 @@ HeartbeatEventHandler::handleEvent(PRPollDesc desc)
 void
 HeartbeatEventHandler::handleTimeout()
 {
-  sendThump();
   setTimeout(PR_SecondsToInterval(TIMEOUT));
+  sendThump();
 }
 
 std::string
@@ -97,7 +96,7 @@ HeartbeatEventHandler::timestamp()
   PRExplodedTime ts;
   PR_ExplodeTime(now, PR_LocalTimeParameters, &ts);
 
-  char buffer[BUFSIZE];
+  char buffer[20];
   sprintf(buffer, "%d%02d%02d-%02d:%02d:%02d", ts.tm_year, ts.tm_month,
     ts.tm_mday, ts.tm_hour, ts.tm_min, ts.tm_sec);
 
@@ -124,4 +123,11 @@ HeartbeatEventHandler::sendTraceOutput()
   std::string output = msg.str();
   // devmgrSUT.py expects NULL terminated str
   mBufSocket.write(output.c_str(), output.size() + 1);
+}
+
+
+EventHandler*
+HeartbeatEventHandlerFactory::createEventHandler(PRFileDesc* socket)
+{
+  return new HeartbeatEventHandler(socket);
 }

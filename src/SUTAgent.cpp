@@ -17,8 +17,8 @@
 #include <prtime.h>
 #include <prtypes.h>
 
-#include "CommandEventHandlerFactory.h"
-#include "HeartbeatEventHandlerFactory.h"
+#include "CommandEventHandler.h"
+#include "HeartbeatEventHandler.h"
 #include "Logger.h"
 #include "Strings.h"
 #include "Reactor.h"
@@ -90,7 +90,7 @@ dict get_reg_data()
 }
 
 
-void setUpAcceptor(EventHandlerFactory* fact, std::string kind, PRInt16 port,
+bool setUpAcceptor(EventHandlerFactory* fact, std::string kind, PRInt16 port,
     PRNetAddr& acceptorAddr)
 {
   SocketAcceptor* acceptor = new SocketAcceptor(fact);
@@ -101,8 +101,9 @@ void setUpAcceptor(EventHandlerFactory* fact, std::string kind, PRInt16 port,
   if (status == PR_FAILURE)
   {
     std::cerr << "Failure to open socket: " << PR_GetError() << std::endl;
-    exit(1);
+    return false;
   }
+  return true;
 }
 
 
@@ -147,9 +148,12 @@ int main(int argc, char **argv)
     return 1;
 
   PRNetAddr cmdAddr, heartbeatAddr;
-  setUpAcceptor(new CommandEventHandlerFactory(), "Command", port, cmdAddr);
-  setUpAcceptor(new HeartbeatEventHandlerFactory(), "Heartbeat", 20700,
-      heartbeatAddr);
+  if(!setUpAcceptor(new CommandEventHandlerFactory(), "Command", port,
+        cmdAddr))
+    return 1;
+  if(!setUpAcceptor(new HeartbeatEventHandlerFactory(), "Heartbeat", 20700,
+      heartbeatAddr))
+    return 1;
 
   dict reg_data = get_reg_data();
   reg_data["IPADDR"] = addrStr(cmdAddr);

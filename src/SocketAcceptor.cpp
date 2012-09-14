@@ -9,7 +9,7 @@
 
 
 SocketAcceptor::SocketAcceptor(EventHandlerFactory* handlerFactory)
-  : mSocket(NULL), handlerFactory(handlerFactory)
+  : mSocket(NULL), mHandlerFactory(handlerFactory)
 {
 }
 
@@ -85,5 +85,5 @@ SocketAcceptor::handleEvent(PRPollDesc desc)
   sockOpt.option = PR_SockOpt_Nonblocking;
   sockOpt.value.non_blocking = PR_TRUE;
   PR_SetSocketOption(newSocket, &sockOpt);
-  EventHandler* handler = handlerFactory->createEventHandler(newSocket);
+  EventHandler* handler = mHandlerFactory->createEventHandler(newSocket);
 }

@@ -34,4 +34,11 @@ private:
   void sendTraceOutput();
 };
 
+
+class HeartbeatEventHandlerFactory: public EventHandlerFactory
+{
+public:
+  virtual EventHandler* createEventHandler(PRFileDesc* socket);
+};
+
 #endif

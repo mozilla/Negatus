@@ -79,4 +79,11 @@ private:
   std::string systime();
 };
 
+
+class CommandEventHandlerFactory: public EventHandlerFactory
+{
+public:
+  virtual EventHandler* createEventHandler(PRFileDesc* socket);
+};
+
 #endif
