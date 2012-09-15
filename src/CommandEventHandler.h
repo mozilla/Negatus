@@ -70,7 +70,6 @@ private:
   std::string testroot(std::vector<std::string>& args);
   std::string ver(std::vector<std::string>& args);
 
-  std::string id();
   std::string memory();
   std::string os();
   std::string power();
@@ -78,6 +77,13 @@ private:
   std::string uptime();
   std::string uptimemillis();
   std::string systime();
+};
+
+
+class CommandEventHandlerFactory: public EventHandlerFactory
+{
+public:
+  virtual EventHandler* createEventHandler(PRFileDesc* socket);
 };
 
 #endif

@@ -8,8 +8,8 @@
 #include "Reactor.h"
 
 
-SocketAcceptor::SocketAcceptor()
-  : mSocket(NULL)
+SocketAcceptor::SocketAcceptor(EventHandlerFactory* handlerFactory)
+  : mSocket(NULL), mHandlerFactory(handlerFactory)
 {
 }
 
@@ -85,5 +85,5 @@ SocketAcceptor::handleEvent(PRPollDesc desc)
   sockOpt.option = PR_SockOpt_Nonblocking;
   sockOpt.value.non_blocking = PR_TRUE;
   PR_SetSocketOption(newSocket, &sockOpt);
-  CommandEventHandler* handler = new CommandEventHandler(newSocket);
+  EventHandler* handler = mHandlerFactory->createEventHandler(newSocket);
 }

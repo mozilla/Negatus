@@ -31,4 +31,11 @@ private:
   bool mClosed;
 };
 
+
+class EventHandlerFactory {
+public:
+  virtual EventHandler* createEventHandler(PRFileDesc* socket) = 0;
+};
+
+
 #endif

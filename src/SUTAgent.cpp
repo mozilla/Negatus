@@ -4,6 +4,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <iostream>
 
@@ -16,6 +17,8 @@
 #include <prtime.h>
 #include <prtypes.h>
 
+#include "CommandEventHandler.h"
+#include "HeartbeatEventHandler.h"
 #include "Logger.h"
 #include "Strings.h"
 #include "Reactor.h"
@@ -60,6 +63,7 @@ PRErrorCode send_query(std::string query, std::string ip, PRUint32 port)
   return 0;
 }
 
+
 void handle_reboot(std::string query)
 {
   FILE *rebt = fopen("/data/local/agent_rebt.txt", "r");
@@ -77,12 +81,31 @@ void handle_reboot(std::string query)
   }
 }
 
+
 dict get_reg_data()
 {
   dict data;
   data["NAME"] = "SUTAgent";
   return data;
 }
+
+
+bool setUpAcceptor(EventHandlerFactory* fact, std::string kind, PRInt16 port,
+    PRNetAddr& acceptorAddr)
+{
+  SocketAcceptor* acceptor = new SocketAcceptor(fact);
+  PR_InitializeNetAddr(PR_IpAddrAny, port, &acceptorAddr);
+  std::cout << kind << " handler ";
+  std::cout << "listening on " << addrStr(acceptorAddr) << std::endl;
+  PRStatus status = acceptor->listen(acceptorAddr);
+  if (status == PR_FAILURE)
+  {
+    std::cerr << "Failure to open socket: " << PR_GetError() << std::endl;
+    return false;
+  }
+  return true;
+}
+
 
 int main(int argc, char **argv)
 {
@@ -124,19 +147,16 @@ int main(int argc, char **argv)
   if (optionError)
     return 1;
 
-  SocketAcceptor* acceptor = new SocketAcceptor();
-  PRNetAddr acceptorAddr;
-  PR_InitializeNetAddr(PR_IpAddrAny, port, &acceptorAddr);
-  std::cout << "listening on " << addrStr(acceptorAddr) << std::endl;
-  PRStatus status = acceptor->listen(acceptorAddr);
-  if (status == PR_FAILURE)
-  {
-    std::cerr << "Failure to open socket: " << PR_GetError() << std::endl;
+  PRNetAddr cmdAddr, heartbeatAddr;
+  if(!setUpAcceptor(new CommandEventHandlerFactory(), "Command", port,
+        cmdAddr))
     return 1;
-  }
+  if(!setUpAcceptor(new HeartbeatEventHandlerFactory(), "Heartbeat", 20700,
+      heartbeatAddr))
+    return 1;
 
   dict reg_data = get_reg_data();
-  reg_data["IPADDR"] = addrStr(acceptorAddr);
+  reg_data["IPADDR"] = addrStr(cmdAddr);
   std::string query = gen_query_url(reg_data);
   std::cout << "Query url: " << query << std::endl;
 

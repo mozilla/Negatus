@@ -8,6 +8,7 @@
 #include "Logging.h"
 #include "PullFileEventHandler.h"
 #include "PushFileEventHandler.h"
+#include "Shell.h"
 #include "Strings.h"
 #include "Subprocess.h"
 #include "SubprocessEventHandler.h"
@@ -466,29 +467,6 @@ CommandEventHandler::info(std::vector<std::string>& args)
   return agentWarn("Invalid info subcommand.");
 }
 
-std::string
-CommandEventHandler::id()
-{
-  std::string interfaces[3] = {"wlan0", "usb0", "lo"};
-  FILE *iface;
-  char buffer[BUFSIZE];
-
-  for (int i = 0; i < 3; ++i)
-  {
-    sprintf(buffer, "/sys/class/net/%s/address", interfaces[i].c_str());
-    iface = fopen(buffer, "r");
-    if (!iface)
-      continue;
-
-    fgets(buffer, BUFSIZE, iface);
-    buffer[strlen(buffer) - 1] = '\0'; // remove extra newline
-    fclose(iface);
-
-    return std::string(buffer);
-  }
-  return std::string("00:00:00:00:00:00");
-}
-
 
 std::string
 CommandEventHandler::os()
@@ -772,4 +750,11 @@ std::string
 CommandEventHandler::ver(std::vector<std::string>& args)
 {
   return std::string("SUTAgentAndroid Version 1.13");
+}
+
+
+EventHandler*
+CommandEventHandlerFactory::createEventHandler(PRFileDesc* socket)
+{
+  return new CommandEventHandler(socket);
 }

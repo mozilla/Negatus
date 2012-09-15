@@ -8,12 +8,14 @@ SRCS=\
 	src/CommandEventHandler.cpp \
 	src/EventHandler.cpp \
 	src/Hash.cpp \
+	src/HeartbeatEventHandler.cpp \
 	src/Logger.cpp \
 	src/Logging.cpp \
 	src/PullFileEventHandler.cpp \
 	src/PushFileEventHandler.cpp \
 	src/Reactor.cpp \
 	src/Registration.cpp \
+	src/Shell.cpp \
 	src/SocketAcceptor.cpp \
 	src/Strings.cpp \
 	src/SUTAgent.cpp \

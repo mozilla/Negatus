@@ -11,7 +11,7 @@
 
 class SocketAcceptor: public EventHandler {
 public:
-  SocketAcceptor();
+  SocketAcceptor(EventHandlerFactory* handlerFactory);
 
   virtual void close();
 
@@ -22,6 +22,7 @@ public:
 
 private:
   PRFileDesc* mSocket;
+  EventHandlerFactory* mHandlerFactory;
 };
 
 #endif
