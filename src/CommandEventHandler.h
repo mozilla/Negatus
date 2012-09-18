@@ -12,6 +12,7 @@
 
 
 #define TESTROOT "/data/local"
+#define REBOOT_FILE "/data/local/.SUTAgent_rebt"
 
 
 class CommandEventHandler: public EventHandler
@@ -64,6 +65,7 @@ private:
   std::string pull(std::vector<std::string>& args);
   std::string push(std::vector<std::string>& args);
   std::string quit(std::vector<std::string>& args);
+  std::string rebt(std::vector<std::string>& args);
   std::string rm(std::vector<std::string>& args);
   std::string rm(std::string path);
   std::string rmdr(std::vector<std::string>& args);

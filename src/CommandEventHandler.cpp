@@ -8,6 +8,7 @@
 #include "Logging.h"
 #include "PullFileEventHandler.h"
 #include "PushFileEventHandler.h"
+#include "Reactor.h"
 #include "Shell.h"
 #include "Strings.h"
 #include "Subprocess.h"
@@ -195,6 +196,8 @@ CommandEventHandler::handleLine(std::string line)
     result = mkdr(cl.args);
   else if (cl.cmd.compare("quit") == 0)
     result = quit(cl.args);
+  else if (cl.cmd.compare("rebt") == 0)
+    result = rebt(cl.args);
   else if (cl.cmd.compare("rm") == 0)
     result = rm(cl.args);
   else if (cl.cmd.compare("rmdr") == 0)
@@ -667,6 +670,30 @@ std::string
 CommandEventHandler::quit(std::vector<std::string>& args)
 {
   close();
+  return "";
+}
+
+
+std::string
+CommandEventHandler::rebt(std::vector<std::string>& args)
+{
+  if (args.size() != 0 && args.size() != 2)
+    return agentWarn("Invalid args. Valid options: no args or IP PORT");
+
+  // store callback IP and PORT in REBOOT_FILE, if specified
+  if (args.size() == 2)
+  {
+    FILE *f = fopen(REBOOT_FILE, "w");
+    if (!f)
+      return agentWarn("Could not write to reboot callback file");
+    fprintf(f, "%s %s\n", args[0].c_str(), args[1].c_str());
+    fclose(f);
+  }
+
+  close();
+  Reactor::instance()->stop();
+  Logger::instance()->log("Rebooting.");
+  popen("reboot", "r");
   return "";
 }
 

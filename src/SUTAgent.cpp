@@ -66,7 +66,7 @@ PRErrorCode send_query(std::string query, std::string ip, PRUint32 port)
 
 void handle_reboot(std::string query)
 {
-  FILE *rebt = fopen("/data/local/agent_rebt.txt", "r");
+  FILE *rebt = fopen(REBOOT_FILE, "r");
   char r_ipaddr[40];
   char line[100];
   PRUint32 r_port;
@@ -77,7 +77,7 @@ void handle_reboot(std::string query)
     fgets(line, 100, rebt);
     sscanf(line, "%s %d", r_ipaddr, &r_port);
     send_query(query, r_ipaddr, r_port);
-    PR_Delete("/data/local/agent_rebt.txt");
+    PR_Delete(REBOOT_FILE);
   }
 }
 
