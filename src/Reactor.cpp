@@ -25,6 +25,7 @@ Reactor::Timeout::operator=(const Timeout& rhs)
   epoch = rhs.epoch;
   interval = rhs.interval;
   evtHandler = rhs.evtHandler;
+  return *this;
 }
 
 

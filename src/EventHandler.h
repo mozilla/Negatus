@@ -35,6 +35,7 @@ private:
 class EventHandlerFactory {
 public:
   virtual EventHandler* createEventHandler(PRFileDesc* socket) = 0;
+  virtual ~EventHandlerFactory();
 };
 
 
