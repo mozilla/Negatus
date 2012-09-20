@@ -34,6 +34,10 @@ Just clone this repo inside `$B2G_REPO/system/`. Build and flash B2G as usual
 and then you will be able to run the agent using `sutagent`. It will be
 in the `$PATH`.
 
+You do need to set the `LD` path for this to work:
+
+    export LD_LIBRARY_PATH=/vendor/lib:/system/lib:/system/b2g
+
 # Start the agent on boot
 
 Insert this after the exports in `$B2G_REPO/gonk-misc/b2g.sh`:
