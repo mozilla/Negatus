@@ -610,13 +610,9 @@ CommandEventHandler::isDir(std::string path)
   PRFileInfo info;
   const char *p = path.c_str();
   PRStatus success = PR_GetFileInfo(p, &info);
-  if (success == PR_SUCCESS)
-  {
-    if (info.type == PR_FILE_DIRECTORY)
-      return std::string("TRUE");
-    return std::string("FALSE");
-  }
-  return agentWarn("invalid path");
+  if (success == PR_SUCCESS && info.type == PR_FILE_DIRECTORY)
+    return std::string("TRUE");
+  return std::string("FALSE");
 }
 
 std::string
