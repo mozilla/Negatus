@@ -30,7 +30,12 @@ Just `./run.sh`.
 
 # Including this in B2G
 
-Just clone this repo inside `$B2G_REPO/system/`. Build and flash B2G as usual
+Once you have the prerequisites and export the environment variables, 
+just clone this repo inside `$B2G_REPO/system/`. Build and flash B2G as usual.
+
+* to run it, you must shell in and run:
+    * `export NSPR_LOG_MODULES="NegatusLOG:5, timestamp" ; export LD_LIBRARY_PATH="/data/local:/data/local/agent:/system/b2g:$LD_LIBRARY_PATH"`
+
 and then you will be able to run the agent using `sutagent`. It will be
 in the `$PATH`.
 
