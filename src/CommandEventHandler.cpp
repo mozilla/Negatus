@@ -178,6 +178,8 @@ CommandEventHandler::handleLine(std::string line)
     result = dirw(cl.args);
   else if (cl.cmd.compare("exec") == 0)
     result = exec(cl.args);
+  else if (cl.cmd.compare("execsu") == 0)
+    result = exec(cl.args);
   else if (cl.cmd.compare("hash") == 0)
     result = hash(cl.args);
   else if (cl.cmd.compare("info") == 0)

@@ -30,9 +30,9 @@ Just `./run.sh`.
 
 # Including this in B2G
 
-Just clone this repo inside `$B2G_REPO/system/`. Build and flash B2G as usual
-and then you will be able to run the agent using `sutagent`. It will be
-in the `$PATH`.
+Once you have the prerequisites and export the environment variables,
+just clone this repo inside `$B2G_REPO/system/`. Build and flash B2G as usual.
+You will be able to run the agent using `sutagent`. It will be in the `$PATH`.
 
 You do need to set the `LD` path for this to work:
 
