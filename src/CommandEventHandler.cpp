@@ -204,6 +204,10 @@ CommandEventHandler::handleLine(std::string line)
     result = rm(cl.args);
   else if (cl.cmd.compare("rmdr") == 0)
     result = rmdr(cl.args);
+  else if (cl.cmd.compare("settime") == 0)
+    result = settime(cl.args);
+  else if (cl.cmd.compare("setutime") == 0)
+    result = setutime(cl.args);
   else if (cl.cmd.compare("testroot") == 0)
     result = testroot(cl.args);
   else if (cl.cmd.compare("ver") == 0)
@@ -332,7 +336,7 @@ CommandEventHandler::cwd(std::vector<std::string>& args)
 std::string
 CommandEventHandler::clok(std::vector<std::string>& args)
 {
-  PRUint64 now = PR_Now() / PR_USEC_PER_SEC;
+  PRUint64 now = PR_Now() / PR_MSEC_PER_SEC;
   return itoa(now);
 }
 
@@ -761,6 +765,96 @@ CommandEventHandler::do_rmdr(std::string path, std::ostringstream &out)
   }
   if (PR_RmDir(p) != PR_SUCCESS)
     out << std::string("error: could not remove " + path) << ENDL;
+}
+
+
+std::string
+CommandEventHandler::settime(std::vector<std::string>& args)
+{
+  if (args.size() < 2)
+    return agentWarnInvalidNumArgs(2);
+
+  // It would be nice to use the NSPR date functions here, but sadly NSPR
+  // provides no way to actually *set* the date, so we use standard POSIX C
+  // calls.
+  std::string dates(args[0]);
+  std::string times(args[1]);
+  std::vector<PRUint64> ints;
+  std::ostringstream out;
+  struct tm datetime;
+  datetime.tm_wday = 0;
+  datetime.tm_yday = 0;
+  datetime.tm_isdst = -1;
+
+  char datec[dates.size()+1];
+  strcpy(datec, dates.c_str());
+  char* tok = strtok(datec, "/");
+  while (tok)
+  {
+    ints.push_back(PR_strtod(tok, NULL));
+    tok = strtok(NULL, "/");
+  }
+
+  if (ints.size() < 3)
+    return agentWarn("Invalid argument(s)");
+
+  datetime.tm_year = ints[0] - 1900;
+  datetime.tm_mon = ints[1] - 1;
+  datetime.tm_mday = ints[2];
+
+  ints.clear();
+  char timec[times.size()+1];
+  strcpy(timec, times.c_str());
+  tok = strtok(timec, ":");
+  while (tok)
+  {
+    ints.push_back(PR_strtod(tok, NULL));
+    tok = strtok(NULL, ":");
+  }
+
+  if (ints.size() < 3)
+    return agentWarn("Invalid argument(s)");
+
+  datetime.tm_hour = ints[0];
+  datetime.tm_min = ints[1];
+  datetime.tm_sec = ints[2];
+
+  time_t tsecs = mktime(&datetime);
+
+  struct timeval tv;
+  struct timezone tz;
+  gettimeofday(NULL, &tz);
+  tv.tv_sec = tsecs;
+  tv.tv_usec = 0;
+  settimeofday(&tv, &tz);
+
+  time_t t = time(NULL);
+  struct tm* newtmp = localtime(&t);
+  out << newtmp->tm_year + 1900 << "/" << newtmp->tm_mon + 1 << "/"
+      << newtmp->tm_mday << " " << newtmp->tm_hour << ":" << newtmp->tm_min
+      << ":" << newtmp->tm_sec;
+  return out.str();
+}
+
+
+std::string
+CommandEventHandler::setutime(std::vector<std::string>& args)
+{
+  if (args.size() < 1)
+    return agentWarnInvalidNumArgs(1);
+  std::string times(args[0]);
+  PRUint64 t = PR_strtod(times.c_str(), NULL);
+
+  struct timeval tv;
+  struct timezone tz;
+  tv.tv_sec = t / 1000;
+  tv.tv_usec = (t - tv.tv_sec * 1000) * 1000;
+  tz.tz_minuteswest = 0;
+  tz.tz_dsttime = 0;
+
+  settimeofday(&tv, &tz);
+
+  return clok(args);  // clok ignores args
 }
 
 

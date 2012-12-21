@@ -69,6 +69,8 @@ private:
   std::string rm(std::vector<std::string>& args);
   std::string rm(std::string path);
   std::string rmdr(std::vector<std::string>& args);
+  std::string settime(std::vector<std::string>& args);
+  std::string setutime(std::vector<std::string>& args);
   std::string testroot(std::vector<std::string>& args);
   std::string ver(std::vector<std::string>& args);
 
