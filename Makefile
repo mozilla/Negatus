@@ -20,7 +20,8 @@ SRCS=\
 	src/Strings.cpp \
 	src/SUTAgent.cpp \
 	src/Subprocess.cpp \
-	src/SubprocessEventHandler.cpp
+	src/SubprocessEventHandler.cpp \
+	src/Version.cpp
 
 OBJS=$(subst .cpp,.o,$(SRCS))
 

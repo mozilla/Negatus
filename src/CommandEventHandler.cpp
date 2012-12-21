@@ -13,6 +13,7 @@
 #include "Strings.h"
 #include "Subprocess.h"
 #include "SubprocessEventHandler.h"
+#include "Version.h"
 
 #include <dirent.h>
 #include <stdint.h>
@@ -868,7 +869,7 @@ CommandEventHandler::testroot(std::vector<std::string>& args)
 std::string
 CommandEventHandler::ver(std::vector<std::string>& args)
 {
-  return std::string("SUTAgentAndroid Version 1.13");
+  return version();
 }
 
 
