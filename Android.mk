@@ -19,7 +19,8 @@ LOCAL_SRC_FILES:= \
 	src/Strings.cpp \
 	src/SUTAgent.cpp \
 	src/Subprocess.cpp \
-	src/SubprocessEventHandler.cpp
+	src/SubprocessEventHandler.cpp \
+	src/Version.cpp
 
 LOCAL_LDFLAGS += -L$(LOCAL_PATH)/libs -lplds4 -lplc4 -ldl -lnspr4
 LOCAL_SHARED_LIBRARIES := libstlport
