@@ -3,10 +3,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "Subprocess.h"
-
+#include "Shell.h"
+#include <sstream>
 #include <stdio.h>
 #include <string.h>
+#include "Logging.h"
+#include "Subprocess.h"
 
 std::string
 id()
@@ -30,3 +32,31 @@ id()
   }
   return std::string("00:00:00:00:00:00");
 }
+
+
+bool
+readTextFile(std::string path, std::string& contents)
+{
+  const char *cpath = path.c_str();
+
+  FILE *fp = fopen(cpath, "r");
+  if (!fp)
+  {
+    fprintf(stderr, "Error on fopen: %s, with mode r.\n", cpath);
+    return false;
+  }
+
+  char buffer[BUFSIZE];
+  std::ostringstream output;
+
+  while (fgets(buffer, BUFSIZE, fp))
+    output << std::string(buffer);
+
+  fclose(fp);
+  std::string str = output.str();
+  if (str.size())
+    str.erase(str.size() - 1);
+  contents = str;
+  return true;
+}
+

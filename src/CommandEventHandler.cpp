@@ -3,6 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 #include "CommandEventHandler.h"
+#include "Config.h"
 #include "Hash.h"
 #include "Logger.h"
 #include "Logging.h"
@@ -235,32 +236,6 @@ CommandEventHandler::sendPrompt()
 }
 
 
-std::string
-CommandEventHandler::readTextFile(std::string path)
-{
-  const char *cpath = path.c_str();
-
-  FILE *fp = fopen(cpath, "r");
-  if (!fp)
-  {
-    fprintf(stderr, "Error on fopen: %s, with mode r.\n", cpath);
-    return agentWarn("Cannot open file");
-  }
-
-  char buffer[BUFSIZE];
-  std::ostringstream output;
-
-  while (fgets(buffer, BUFSIZE, fp))
-    output << std::string(buffer);
-
-  fclose(fp);
-  std::string str = output.str();
-  if (str.size())
-    str.erase(str.size() - 1);
-  return str;
-}
-
-
 int
 CommandEventHandler::getFirstIntPos(char *str, int limit)
 {
@@ -277,6 +252,7 @@ CommandEventHandler::getFirstIntPos(char *str, int limit)
 std::string
 CommandEventHandler::joinPaths(std::string p1, std::string p2)
 {
+  // FIXME: depends on POSIX-like paths
   if (p1[p1.length() - 1] == '/')
     p1 = p1.substr(0, p1.length() - 1);
   if (p2[0] == '/')
@@ -515,9 +491,12 @@ CommandEventHandler::uptime()
 std::string
 CommandEventHandler::uptimemillis()
 {
-  std::string uptime_file = readTextFile("/proc/uptime");
+  std::string uptimeStr;
+  if (!readTextFile("/proc/uptime", uptimeStr))
+    return agentWarn("could not read /proc/uptime");
+
   double uptime;
-  sscanf(&uptime_file[0], "%lf", &uptime);
+  sscanf(&uptimeStr[0], "%lf", &uptime);
   uptime *= 1000;
   std::ostringstream out;
   out << (int) uptime;
@@ -529,7 +508,10 @@ CommandEventHandler::uptimemillis()
 std::string
 CommandEventHandler::screen()
 {
-  return readTextFile("/sys/devices/virtual/graphics/fb0/modes");
+  std::string out;
+  if (!readTextFile("/sys/devices/virtual/graphics/fb0/modes", out))
+    return agentWarn("could not read screen mode");
+  return out;
 }
 
 
@@ -557,14 +539,16 @@ CommandEventHandler::memory()
 std::string
 CommandEventHandler::power()
 {
+  std::string capacity, status;
+  if (!readTextFile("/sys/class/power_supply/battery/capacity", capacity))
+    return agentWarn("could not read battery capacity");
+  if (!readTextFile("/sys/class/power_supply/battery/status", status))
+    return agentWarn("could not read battery status");
+
   std::ostringstream ret;
-
   ret << "Power status:" << ENDL;
-  ret << "\tCurrent %: ";
-  ret << readTextFile("/sys/class/power_supply/battery/capacity");
-  ret << "\tStatus: ";
-  ret << readTextFile("/sys/class/power_supply/battery/status");
-
+  ret << "\tCurrent %: " << capacity;
+  ret << "\tStatus: " << status;
   return ret.str();
 }
 
@@ -687,7 +671,8 @@ CommandEventHandler::rebt(std::vector<std::string>& args)
   // store callback IP and PORT in REBOOT_FILE, if specified
   if (args.size() == 2)
   {
-    FILE *f = fopen(REBOOT_FILE, "w");
+    FILE *f = fopen(joinPaths(Config::instance()->mTestRoot,
+                              REBOOT_FILE).c_str(), "w");
     if (!f)
       return agentWarn("Could not write to reboot callback file");
     fprintf(f, "%s %s\n", args[0].c_str(), args[1].c_str());
@@ -863,7 +848,7 @@ CommandEventHandler::setutime(std::vector<std::string>& args)
 std::string
 CommandEventHandler::testroot(std::vector<std::string>& args)
 {
-  return std::string(TESTROOT);
+  return Config::instance()->mTestRoot;
 }
 
 

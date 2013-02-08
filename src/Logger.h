@@ -6,19 +6,20 @@
 #define negatus_logger_h
 
 #include <prlog.h>
-
 #include <string>
 
-class Logger {
-  public:
-    static Logger* instance();
-    void log(std::string msg);
+class Logger
+{
+public:
+  static Logger* instance();
+  void log(std::string msg);
+  static std::string mTestRoot;
 
-  private:
-    static Logger* mInstance;
-    static PRLogModuleInfo* logModule;
+private:
+  static Logger* mInstance;
+  static PRLogModuleInfo* logModule;
 
-    Logger();
+  Logger();
 };
 
 #endif

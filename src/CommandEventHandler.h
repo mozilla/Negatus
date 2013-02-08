@@ -10,9 +10,7 @@
 #include "BufferedSocket.h"
 #include "EventHandler.h"
 
-
-#define TESTROOT "/data/local"
-#define REBOOT_FILE "/data/local/.SUTAgent_rebt"
+#define REBOOT_FILE ".SUTAgent_rebt"
 
 
 class CommandEventHandler: public EventHandler
@@ -43,7 +41,6 @@ private:
   void sendPrompt();
   void do_rmdr(std::string path, std::ostringstream &out);
 
-  std::string readTextFile(std::string path);
   int getFirstIntPos(char *str, int limit);
   std::string joinPaths(std::string p1, std::string p2);
   bool checkDataEventHandler(PRPollDesc desc);

@@ -18,16 +18,24 @@
 #include <prtypes.h>
 
 #include "CommandEventHandler.h"
+#include "Config.h"
 #include "HeartbeatEventHandler.h"
 #include "Logger.h"
-#include "Strings.h"
 #include "Reactor.h"
-#include "SocketAcceptor.h"
 #include "Registration.h"
+#include "Shell.h"
+#include "SocketAcceptor.h"
+#include "Strings.h"
 
 
 // FIXME: This is not portable!
 #include <signal.h>
+
+static const PLLongOpt longOpts[] = {
+  { "heartbeat", 'b', PR_TRUE },
+  { "testroot", 't', PR_TRUE },
+  { NULL, }
+};
 
 bool wantToDie = false;
 
@@ -112,22 +120,36 @@ int main(int argc, char **argv)
   signal(SIGTERM, &signalHandler);
   signal(SIGINT, &signalHandler);
   signal(SIGHUP, &signalHandler);
-  PRInt16 port = 20701;
+  PRInt16 port = 20701, heartbeatPort = 20700;
+  std::string testRoot;
   bool optionError = false;
-  PLOptState* optState = PL_CreateOptState(argc, argv, "p:");
+  std::ostringstream usageo;
+  usageo << "Usage: " << argv[0]
+         << " [-p <port>] [--heartbeat <port>] [--testroot <testroot>]";
+  std::string usage(usageo.str());
+  PLOptState* optState = PL_CreateLongOptState(argc, argv, "hp:", longOpts);
   while (true)
   {
     PLOptStatus status = PL_GetNextOpt(optState);
     if (status == PL_OPT_BAD)
     {
-      std::cerr << "Incorrect option(s). Usage: " << argv[0] << " [-p <port>]"
-                << std::endl;
+      std::cerr << "Incorrect option(s). " << usage << std::endl;
       optionError = true;
       break;
     }
     else if (status == PL_OPT_OK)
     {
-      if (optState->option == 'p')
+      if (optState->option == 0 && optState->longOptIndex < 0)
+      {
+        // Ignore positional parameters.
+        continue;
+      }
+
+      if (optState->longOption == 'h')
+      {
+        std::cout << usage << std::endl;
+      }
+      else if (optState->longOption == 'p')
       {
         port = PR_strtod(optState->value, NULL);
         if (port <= 0)
@@ -137,6 +159,18 @@ int main(int argc, char **argv)
           break;
         }
       }
+      else if (optState->longOption == 'b')
+      {
+        heartbeatPort = PR_strtod(optState->value, NULL);
+        if (heartbeatPort <= 0)
+        {
+          std::cerr << "Invalid heartbeat port number." << std::endl;
+          optionError = true;
+          break;
+        }
+      }
+      else if (optState->longOption == 't')
+        testRoot = std::string(optState->value);
     }
     else if (status == PL_OPT_EOL)
       break;
@@ -147,12 +181,14 @@ int main(int argc, char **argv)
   if (optionError)
     return 1;
 
+  Config::instance()->setTestRoot(testRoot);
+
   PRNetAddr cmdAddr, heartbeatAddr;
-  if(!setUpAcceptor(new CommandEventHandlerFactory(), "Command", port,
-        cmdAddr))
+  if (!setUpAcceptor(new CommandEventHandlerFactory(), "Command", port,
+                    cmdAddr))
     return 1;
-  if(!setUpAcceptor(new HeartbeatEventHandlerFactory(), "Heartbeat", 20700,
-      heartbeatAddr))
+  if (!setUpAcceptor(new HeartbeatEventHandlerFactory(), "Heartbeat",
+                    heartbeatPort, heartbeatAddr))
     return 1;
 
   dict reg_data = get_reg_data();

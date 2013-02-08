@@ -8,5 +8,6 @@
 #include <string>
 
 std::string id();
+bool readTextFile(std::string path, std::string& contents);
 
 #endif
