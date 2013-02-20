@@ -5,6 +5,7 @@ LOCAL_SRC_FILES:= \
 	src/Buffer.cpp \
 	src/BufferedSocket.cpp \
 	src/CommandEventHandler.cpp \
+	src/Config.cpp \
 	src/EventHandler.cpp \
 	src/Hash.cpp \
 	src/HeartbeatEventHandler.cpp \
