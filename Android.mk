@@ -23,8 +23,8 @@ LOCAL_SRC_FILES:= \
 	src/SubprocessEventHandler.cpp \
 	src/Version.cpp
 
-LOCAL_LDFLAGS += -L$(LOCAL_PATH)/libs -llog -ldl $(GECKO_OBJDIR)/dist/lib/libplds4.a $(GECKO_OBJDIR)/dist/lib/libplc4.a $(GECKO_OBJDIR)/dist/lib/libnspr4.a
-LOCAL_SHARED_LIBRARIES := libstlport
+LOCAL_LDFLAGS += -ldl $(LOCAL_PATH)/libs/libplds4.a $(LOCAL_PATH)/libs/libplc4.a $(LOCAL_PATH)/libs/libnspr4.a
+LOCAL_SHARED_LIBRARIES := libstlport liblog
 LOCAL_C_INCLUDES:= \
        $(shell nspr-config --includedir) \
        external/stlport/stlport \
