@@ -56,6 +56,7 @@ private:
   std::string isDir(std::vector<std::string>& args);
   std::string isDir(std::string path);
   std::string info(std::vector<std::string>& args);
+  std::string kill(std::vector<std::string>& args);
   std::string ls(std::vector<std::string>& args);
   std::string mkdr(std::vector<std::string>& args);
   std::string ps(std::vector<std::string>& args);

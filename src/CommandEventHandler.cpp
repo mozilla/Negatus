@@ -17,6 +17,7 @@
 #include "Version.h"
 
 #include <dirent.h>
+#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -195,6 +196,8 @@ CommandEventHandler::handleLine(std::string line)
     result = push(cl.args);
   else if (cl.cmd.compare("isdir") == 0)
     result = isDir(cl.args);
+  else if (cl.cmd.compare("kill") == 0)
+    result = kill(cl.args);
   else if (cl.cmd.compare("ls") == 0)
     result = ls(cl.args);
   else if (cl.cmd.compare("mkdr") == 0)
@@ -606,6 +609,47 @@ CommandEventHandler::isDir(std::string path)
     return std::string("TRUE");
   return std::string("FALSE");
 }
+
+
+std::string
+CommandEventHandler::kill(std::vector<std::string>& args)
+{
+  if (args.size() != 1)
+    return agentWarnInvalidNumArgs(1);
+
+  const char *procname = args[0].c_str();
+  bool killed = false;
+
+  PRDir *dir = PR_OpenDir("/proc");
+  PRDirEntry *entry = PR_ReadDir(dir, PR_SKIP_BOTH);
+
+  while (entry)
+  {
+    std::ostringstream p;
+
+    int pid = strtol(entry->name, NULL, 10);
+    if (pid != 0)
+    {
+      p << "/proc/" << entry->name << "/comm";
+      std::string comm;
+      if (readTextFile(p.str(), comm))
+        if (strcmp(comm.c_str(), procname) == 0)
+          if (::kill(pid, SIGKILL) == 0)
+            killed = true;
+    }
+
+    entry = PR_ReadDir(dir, PR_SKIP_BOTH);
+  }
+
+  std::ostringstream res;
+  if (killed)
+    res << "Successfully killed " << procname;
+  else
+    res << "Unable to kill " << procname;
+
+  return res.str();
+}
+
 
 std::string
 CommandEventHandler::ls(std::vector<std::string>& args)
