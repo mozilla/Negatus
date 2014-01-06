@@ -460,7 +460,11 @@ CommandEventHandler::os()
 {
   // not really supported yet. Best we could do is
   // cat /system/sources.xml | grep gaia and another grep for m-c
+#ifdef NEGATUS_LINUX_DESKTOP_BUILD
+  return std::string("linux");
+#else
   return std::string("B2G");
+#endif
 }
 
 
@@ -524,14 +528,14 @@ CommandEventHandler::memory()
     return agentWarn("Error on fopen: /proc/meminfo, with mode r");
   }
 
-  unsigned int total, available;
+  unsigned long total, available;
   char buffer[BUFSIZE];
   fgets(buffer, BUFSIZE, meminfo);
-  sscanf(buffer + getFirstIntPos(buffer, BUFSIZE), "%u", &total);
+  sscanf(buffer + getFirstIntPos(buffer, BUFSIZE), "%lu", &total);
   fgets(buffer, BUFSIZE, meminfo);
-  sscanf(buffer + getFirstIntPos(buffer, BUFSIZE), "%u", &available);
+  sscanf(buffer + getFirstIntPos(buffer, BUFSIZE), "%lu", &available);
 
-  sprintf(buffer, "Total: %d; Available: %d.", total * 1000, available * 1000);
+  sprintf(buffer, "Total: %lu; Available: %lu.", total * 1000, available * 1000);
   return std::string(buffer);
 }
 
@@ -556,8 +560,12 @@ CommandEventHandler::power()
 std::string
 CommandEventHandler::ps(std::vector<std::string>& args)
 {
-  // might need to change command on linux since the output is different on B2G
+#ifdef NEGATUS_LINUX_DESKTOP_BUILD
+  // remove leading space and extra spaces between columns
+  return getCmdOutput("ps --no-header -eo pid,uid,comm |sed \"s/^\\s\\+//;s/\\s\\+/ /\"");
+#else
   return getCmdOutput("ps | tr -s \" \" | cut -d' ' -f1,2,9 | tail +2");
+#endif
 }
 
 
