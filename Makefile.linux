@@ -4,6 +4,7 @@ CXX=g++
 LD:=$(CXX)
 
 CPPFLAGS=\
+        -DNEGATUS_LINUX_DESKTOP_BUILD \
         -g \
 	$(shell nspr-config --cflags)
 
