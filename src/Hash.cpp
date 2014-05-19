@@ -12,7 +12,7 @@ fileHash(std::string path)
 {
   std::ostringstream ss;
 #if defined(__apple_build_version__)
-	ss << "md5 -r " << path;
+  ss << "md5 -r " << path;
 #else
   ss << "md5sum " << path;
 #endif
