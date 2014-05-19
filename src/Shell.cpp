@@ -25,6 +25,8 @@ id()
       continue;
 
     fgets(buffer, BUFSIZE, iface);
+    
+    // Error handling here. What if line is longer than BUFSIZE bytes?
     buffer[strlen(buffer) - 1] = '\0'; // remove extra newline
     fclose(iface);
 

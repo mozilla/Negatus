@@ -309,6 +309,8 @@ std::string
 CommandEventHandler::cwd(std::vector<std::string>& args)
 {
   char buffer[BUFSIZE];
+  
+  // Check for errors here.
   getcwd(buffer, BUFSIZE);
   return std::string(buffer);
 }
