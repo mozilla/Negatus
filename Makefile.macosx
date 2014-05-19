@@ -1,0 +1,16 @@
+CXX=g++
+# g++ knows how to link in the c++ runtime and dylibs correctly; without it, we
+# would have to replicate the link line that g++ uses.
+#LD=ld
+LD:=$(CXX)
+LDFLAGS+=-arch i386
+
+CPPFLAGS=\
+        -DNEGATUS_LINUX_DESKTOP_BUILD \
+        -g \
+        -arch i386 \
+		`/usr/local/bin/nspr-config --cflags`
+
+LDLIBS=`/usr/local/bin/nspr-config --libs`
+
+include Makefile

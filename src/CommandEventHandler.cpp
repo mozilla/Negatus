@@ -463,7 +463,9 @@ CommandEventHandler::os()
 {
   // not really supported yet. Best we could do is
   // cat /system/sources.xml | grep gaia and another grep for m-c
-#ifdef NEGATUS_LINUX_DESKTOP_BUILD
+#if defined(__apple_build_version__)
+  return std::string("macosx");
+#elif defined(NEGATUS_LINUX_DESKTOP_BUILD)
   return std::string("linux");
 #else
   return std::string("B2G");

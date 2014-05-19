@@ -1,4 +1,4 @@
-# Prerequisites
+# Prerequisites - Android
 
 You need to:
 
@@ -51,3 +51,34 @@ Before running the agent (not necessary if you use `run.sh`):
 `export NSPR_LOG_MODULES="NegatusLOG:5, timestamp"`
 
 Data will be logged to `$TESTROOT/Negatus.log`.
+
+Prerequisites - Desktop Linux
+
+The linux build requires the nspr libraries and headers. On Ubuntu, you can do
+
+    sudo apt-get install g++ libnspr4-dev
+
+Build with:
+
+    make -f Makefile.linux
+
+Invoke with:
+
+    ./agent
+
+Prerequisites - Mac OS X
+
+You need to have the latest version of Xcode (available from the App Store) and the
+command line developer tools packages installed. You will have to build your own
+nspr Mac installation, available at 
+https://ftp.mozilla.org/pub/mozilla.org/nspr/releases/.
+
+The default nspr build installs nspr to /usr/local; the Mac Makefile assumes that you
+have done that. To build Negatus, do:
+
+    make -f Makefile.macosx
+
+Invoke with:
+
+    ./agent
+
