@@ -1,6 +1,4 @@
-toolchain
-*.o
+.DS_Store
 agent
-busybox-armv6l*
-*.swp
-*.log
+*.o
+

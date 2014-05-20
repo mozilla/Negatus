@@ -9,7 +9,7 @@
 
 #define SD_CARD_MOUNT "/mnt/sdcard"
 #define TESTROOT_SD_CARD "/mnt/sdcard/test"
-#ifdef NEGATUS_LINUX_DESKTOP_BUILD
+#if defined(NEGATUS_LINUX_DESKTOP_BUILD) || defined(__apple_build_version__)
 #define TESTROOT_NO_SD_CARD "/tmp"
 #else
 #define TESTROOT_NO_SD_CARD "/data/local/tmp"

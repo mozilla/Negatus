@@ -6,10 +6,9 @@ LD:=$(CXX)
 LDFLAGS+=-arch i386
 
 CPPFLAGS=\
-        -DNEGATUS_LINUX_DESKTOP_BUILD \
         -g \
         -arch i386 \
-		`/usr/local/bin/nspr-config --cflags`
+        `/usr/local/bin/nspr-config --cflags`
 
 LDLIBS=`/usr/local/bin/nspr-config --libs`
 

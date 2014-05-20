@@ -310,7 +310,7 @@ CommandEventHandler::cwd(std::vector<std::string>& args)
 {
   char buffer[BUFSIZE];
   
-  // Check for errors here.
+  // FIXME: Check for errors here.
   getcwd(buffer, BUFSIZE);
   return std::string(buffer);
 }
@@ -567,7 +567,9 @@ CommandEventHandler::power()
 std::string
 CommandEventHandler::ps(std::vector<std::string>& args)
 {
-#ifdef NEGATUS_LINUX_DESKTOP_BUILD
+#if defined(__apple_build_version__)
+  return getCmdOutput("ps -o pid=,uid=,comm= |sed \"s/^\\s\\+//;s/\\s\\+/ /\"");
+#elif defined(NEGATUS_LINUX_DESKTOP_BUILD)
   // remove leading space and extra spaces between columns
   return getCmdOutput("ps --no-header -eo pid,uid,comm |sed \"s/^\\s\\+//;s/\\s\\+/ /\"");
 #else
