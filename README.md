@@ -70,7 +70,7 @@ Prerequisites - Mac OS X
 
 You need to have the latest version of Xcode (available from the App Store) and the
 command line developer tools packages installed. You will have to build your own
-nspr Mac installation, available at 
+nspr Mac installation, available at
 https://ftp.mozilla.org/pub/mozilla.org/nspr/releases/.
 
 The default nspr build installs nspr to /usr/local; the Mac Makefile assumes that you
@@ -81,4 +81,3 @@ have done that. To build Negatus, do:
 Invoke with:
 
     ./agent
-
