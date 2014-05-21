@@ -11,7 +11,12 @@ std::string
 fileHash(std::string path)
 {
   std::ostringstream ss;
+#if defined(__apple_build_version__)
+  ss << "md5 -r " << path;
+#else
   ss << "md5sum " << path;
+#endif
+
   std::string hash = getCmdOutput(ss.str());
   // strip everything past actual hash string
   return hash.substr(0, hash.find(" "));

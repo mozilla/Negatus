@@ -98,7 +98,6 @@ BufferedSocket::readIntoBuffer(PRUint32 size)
   }
   else if (status > 0)
   {
-    mTmpBuf[status] = 0;
     mReadBuffer.put(mTmpBuf, status);
     numRead = status;
   }

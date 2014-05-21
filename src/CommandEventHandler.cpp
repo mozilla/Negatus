@@ -309,6 +309,8 @@ std::string
 CommandEventHandler::cwd(std::vector<std::string>& args)
 {
   char buffer[BUFSIZE];
+  
+  // FIXME: Check for errors here.
   getcwd(buffer, BUFSIZE);
   return std::string(buffer);
 }
@@ -463,7 +465,9 @@ CommandEventHandler::os()
 {
   // not really supported yet. Best we could do is
   // cat /system/sources.xml | grep gaia and another grep for m-c
-#ifdef NEGATUS_LINUX_DESKTOP_BUILD
+#if defined(__apple_build_version__)
+  return std::string("macosx");
+#elif defined(NEGATUS_LINUX_DESKTOP_BUILD)
   return std::string("linux");
 #else
   return std::string("B2G");
@@ -563,7 +567,9 @@ CommandEventHandler::power()
 std::string
 CommandEventHandler::ps(std::vector<std::string>& args)
 {
-#ifdef NEGATUS_LINUX_DESKTOP_BUILD
+#if defined(__apple_build_version__)
+  return getCmdOutput("ps -o pid=,uid=,comm= |sed \"s/^\\s\\+//;s/\\s\\+/ /\"");
+#elif defined(NEGATUS_LINUX_DESKTOP_BUILD)
   // remove leading space and extra spaces between columns
   return getCmdOutput("ps --no-header -eo pid,uid,comm |sed \"s/^\\s\\+//;s/\\s\\+/ /\"");
 #else
