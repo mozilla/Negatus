@@ -86,7 +86,7 @@ Prerequisites - Windows
 
 The Windows build requires Visual C++ 2010 or later to be installed, as well as [the MozillaBuild environment]. Install both, then launch a MozillaBuild shell by running start-shell-msvcXXXX.bat, where XXXX is the version you have installed (i.e. 2010).
 
-You will first need to build a copy of NSPR. Download the latest NSPR source from [the Mozilla download server] (currently [NSPR 4.10.6]) and untar it,  or clone it from [the NSPR Mercurial repository] using hg. In the NSPR source directory execute:
+You will first need to build a copy of NSPR. Download the latest NSPR source from [the Mozilla download server], currently [NSPR 4.10.6] and untar it,  or clone it from [the NSPR Mercurial repository] using hg. In the NSPR source directory execute:
 
     ./configure --enable-win32-target=WIN95 && make
 
