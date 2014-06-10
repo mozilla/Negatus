@@ -20,7 +20,7 @@
 std::string
 mac_address_string(BYTE mac[MAX_ADAPTER_ADDRESS_LENGTH], DWORD length)
 {
-  std::string s(17);
+  std::string s;
   for (DWORD i = 0; i < length; i++) {
     if (i != 0) {
       s.append(":");

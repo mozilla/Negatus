@@ -534,7 +534,7 @@ CommandEventHandler::uptimemillis()
   return out.str();
 #else
   return "not implemented";
-#else
+#endif
 }
 // TODO rotation
 
