@@ -7,6 +7,11 @@
 #include <sstream>
 #include <stdio.h>
 
+#ifdef _WIN32
+#define popen _popen
+#define pclose _pclose
+#endif
+
 FILE*
 checkPopen(std::string cmd, std::string mode)
 {

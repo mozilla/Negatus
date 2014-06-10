@@ -1,0 +1,24 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this file,
+# You can obtain one at http://mozilla.org/MPL/2.0/.
+
+EXE := .exe
+OBJ := .obj
+
+include Makefile.common
+
+ifdef NSPR
+CFLAGS := -I$(NSPR)/dist/include/nspr -EHsc
+LDLIBS := $(NSPR)/dist/lib/nspr4.lib $(NSPR)/dist/lib/plc4.lib user32.lib iphlpapi.lib
+else
+$(error Pass NSPR=/path/to/nspr)
+endif
+
+CC := cl
+LD := link
+
+$(AGENT): $(OBJS)
+	$(LD) -NOLOGO -OUT:$@ $(OBJS) $(LDFLAGS) $(LDLIBS)
+
+%.obj: %.cpp
+	$(CC) -nologo $(CFLAGS) $(CPPFLAGS) -Fo$@ -c $<

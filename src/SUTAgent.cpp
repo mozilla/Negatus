@@ -117,9 +117,11 @@ bool setUpAcceptor(EventHandlerFactory* fact, std::string kind, PRInt16 port,
 
 int main(int argc, char **argv)
 {
+#ifndef _WIN32
   signal(SIGTERM, &signalHandler);
   signal(SIGINT, &signalHandler);
   signal(SIGHUP, &signalHandler);
+#endif
   PRInt16 port = 20701, heartbeatPort = 20700;
   std::string testRoot;
   bool optionError = false;

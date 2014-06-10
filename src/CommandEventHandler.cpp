@@ -16,17 +16,30 @@
 #include "SubprocessEventHandler.h"
 #include "Version.h"
 
+#ifndef _WIN32
 #include <dirent.h>
+#else
+#include <direct.h>
+#define chdir _chdir
+#endif
 #include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
+#ifdef _WIN32
+#include <windows.h>
+#define strtok_r strtok_s
+#endif
 
 #include <prdtoa.h>
 #include <prproces.h>
@@ -35,12 +48,14 @@
 #define PERMS755 PR_IRWXU | PR_IRGRP | PR_IXGRP | PR_IROTH | PR_IXOTH
 
 
+
+
 CommandEventHandler::CommandLine::CommandLine(std::string line)
   : cmd("")
 {
-  char linec[line.size()+1];
-  strcpy(linec, line.c_str());
-  char* cmdc = strtok(linec, " \t");
+  std::vector<char> linec(line.begin(), line.end());
+  linec.push_back('\0');
+  char* cmdc = strtok(&linec[0], " \t");
   if (!cmdc)
     return;
   cmd = cmdc;
@@ -363,12 +378,10 @@ CommandEventHandler::exec(std::vector<std::string>& args)
   // if we have envs we have to handle them separately
   if (envs)
   {
-    char envVarStr[(*argi).size() + 1];
-    envVarStr[(*argi).size()] = 0;
-    (*argi).copy(envVarStr, (*argi).size());
-    envVarStr[(*argi).size()] = 0;
+    std::vector<char> envVarStr(argi->begin(), argi->end());
+    envVarStr.push_back('\0');
     char *r_env;
-    char *env = strtok_r(envVarStr, ",", &r_env);
+    char *env = strtok_r(&envVarStr[0], ",", &r_env);
     // now we have something like env1=val1
     while (env)
     {
@@ -465,10 +478,12 @@ CommandEventHandler::os()
 {
   // not really supported yet. Best we could do is
   // cat /system/sources.xml | grep gaia and another grep for m-c
-#if defined(__apple_build_version__)
+#if defined(__APPLE__)
   return std::string("macosx");
-#elif defined(NEGATUS_LINUX_DESKTOP_BUILD)
+#elif defined(__linux__) && !defined(__ANDROID__)
   return std::string("linux");
+#elif defined(_WIN32)
+  return "windows";
 #else
   return std::string("B2G");
 #endif
@@ -494,7 +509,11 @@ CommandEventHandler::systime()
 std::string
 CommandEventHandler::uptime()
 {
+#if defined(_WIN32)
   return getCmdOutput("uptime");
+#else
+  return "not implemented";
+#endif
 }
 
 
@@ -502,6 +521,7 @@ CommandEventHandler::uptime()
 std::string
 CommandEventHandler::uptimemillis()
 {
+#if defined(__linux__)
   std::string uptimeStr;
   if (!readTextFile("/proc/uptime", uptimeStr))
     return agentWarn("could not read /proc/uptime");
@@ -512,6 +532,9 @@ CommandEventHandler::uptimemillis()
   std::ostringstream out;
   out << (int) uptime;
   return out.str();
+#else
+  return "not implemented";
+#else
 }
 // TODO rotation
 
@@ -634,6 +657,7 @@ CommandEventHandler::kill(std::vector<std::string>& args)
   const char *procname = args[0].c_str();
   bool killed = false;
 
+#if defined(__linux__)
   PRDir *dir = PR_OpenDir("/proc");
   PRDirEntry *entry = PR_ReadDir(dir, PR_SKIP_BOTH);
 
@@ -654,6 +678,9 @@ CommandEventHandler::kill(std::vector<std::string>& args)
 
     entry = PR_ReadDir(dir, PR_SKIP_BOTH);
   }
+#else
+#pragma message("Implement kill!")
+#endif
 
   std::ostringstream res;
   if (killed)
@@ -740,7 +767,12 @@ CommandEventHandler::rebt(std::vector<std::string>& args)
   close();
   Reactor::instance()->stop();
   Logger::instance()->log("Rebooting.");
+#ifndef _WIN32
   popen("reboot", "r");
+#else
+  ExitWindowsEx(EWX_REBOOT | EWX_FORCEIFHUNG,
+                SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED);
+#endif
   return "";
 }
 
@@ -831,9 +863,9 @@ CommandEventHandler::settime(std::vector<std::string>& args)
   datetime.tm_yday = 0;
   datetime.tm_isdst = -1;
 
-  char datec[dates.size()+1];
-  strcpy(datec, dates.c_str());
-  char* tok = strtok(datec, "/");
+  std::vector<char> datec(dates.begin(), dates.end());
+  datec.push_back('\0');
+  char* tok = strtok(&datec[0], "/");
   while (tok)
   {
     ints.push_back(PR_strtod(tok, NULL));
@@ -848,9 +880,9 @@ CommandEventHandler::settime(std::vector<std::string>& args)
   datetime.tm_mday = ints[2];
 
   ints.clear();
-  char timec[times.size()+1];
-  strcpy(timec, times.c_str());
-  tok = strtok(timec, ":");
+  std::vector<char> timec(times.begin(), times.end());
+  timec.push_back('\0');
+  tok = strtok(&timec[0], ":");
   while (tok)
   {
     ints.push_back(PR_strtod(tok, NULL));
@@ -865,7 +897,7 @@ CommandEventHandler::settime(std::vector<std::string>& args)
   datetime.tm_sec = ints[2];
 
   time_t tsecs = mktime(&datetime);
-
+#ifndef _WIN32
   struct timeval tv;
   struct timezone tz;
   gettimeofday(NULL, &tz);
@@ -878,6 +910,9 @@ CommandEventHandler::settime(std::vector<std::string>& args)
   out << newtmp->tm_year + 1900 << "/" << newtmp->tm_mon + 1 << "/"
       << newtmp->tm_mday << " " << newtmp->tm_hour << ":" << newtmp->tm_min
       << ":" << newtmp->tm_sec;
+#else
+#pragma message("Implement settime!")
+#endif
   return out.str();
 }
 
@@ -890,6 +925,7 @@ CommandEventHandler::setutime(std::vector<std::string>& args)
   std::string times(args[0]);
   PRUint64 t = PR_strtod(times.c_str(), NULL);
 
+#ifndef _WIN32
   struct timeval tv;
   struct timezone tz;
   tv.tv_sec = t / 1000;
@@ -898,6 +934,9 @@ CommandEventHandler::setutime(std::vector<std::string>& args)
   tz.tz_dsttime = 0;
 
   settimeofday(&tv, &tz);
+#else
+#pragma message("Implement setutime!")
+#endif
 
   return clok(args);  // clok ignores args
 }

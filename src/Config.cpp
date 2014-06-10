@@ -55,13 +55,13 @@ Config::setTestRoot(std::string testRoot)
 void
 Config::setDefaultTestRoot()
 {
+#if defined(__linux__)
   // FIXME: POSIX specific
   std::string mounts;
   if (readTextFile("/proc/mounts", mounts))
   {
-    char mountsc[mounts.size()+1];
-    strcpy(mountsc, mounts.c_str());
-    char* line = strtok(mountsc, "\n");
+    std::vector<char> mountsc(mounts.begin(), mounts.end());
+    char* line = strtok(&mountsc[0], "\n");
     while (line)
     {
       char* beg = strchr(line, ' ');
@@ -80,6 +80,7 @@ Config::setDefaultTestRoot()
       line = strtok(NULL, "\n");
     }
   }
+#endif
 
   if (mTestRoot.empty())
     mTestRoot = TESTROOT_NO_SD_CARD;
