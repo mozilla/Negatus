@@ -9,6 +9,12 @@
 #include <prio.h>
 #include <string.h>
 #include "Shell.h"
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#include <algorithm>
+#include <vector>
 
 Config* Config::mInstance = NULL;
 
@@ -79,6 +85,16 @@ Config::setDefaultTestRoot()
       }
       line = strtok(NULL, "\n");
     }
+  }
+#elif defined(_WIN32)
+  DWORD size = GetTempPath(0, nullptr);
+  std::vector<char> path(size);
+  if (GetTempPath(size, &path[0]))
+  {
+    mTestRoot = &path[0];
+    std::replace(mTestRoot.begin(), mTestRoot.end(), '\\', '/');
+    if (mTestRoot[mTestRoot.size() - 1] == '/')
+      mTestRoot.erase(mTestRoot.end() - 1);
   }
 #endif
 
