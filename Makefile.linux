@@ -5,7 +5,7 @@ LD:=$(CXX)
 
 CPPFLAGS=\
         -DNEGATUS_LINUX_DESKTOP_BUILD \
-        -g \
+        -g --std=gnu++11 \
 	$(shell nspr-config --cflags)
 
 LDLIBS=$(shell nspr-config --libs) -lrt

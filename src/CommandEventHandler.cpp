@@ -517,7 +517,7 @@ CommandEventHandler::systime()
 std::string
 CommandEventHandler::uptime()
 {
-#if defined(_WIN32)
+#if !defined(_WIN32)
   return getCmdOutput("uptime");
 #else
   return "not implemented";

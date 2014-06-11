@@ -37,11 +37,12 @@ std::string
 id()
 {
 #ifndef _WIN32
-  std::string interfaces[3] = {"wlan0", "usb0", "eth0", "lo"};
+  std::string interfaces[] = {"wlan0", "usb0", "eth0", "lo"};
+  const int kNumInterfaces = sizeof(interfaces) / sizeof(interfaces[0]);
   FILE *iface;
   char buffer[BUFSIZE];
 
-  for (int i = 0; i < 3; ++i)
+  for (int i = 0; i < kNumInterfaces; ++i)
   {
     sprintf(buffer, "/sys/class/net/%s/address", interfaces[i].c_str());
     iface = fopen(buffer, "r");
