@@ -41,21 +41,30 @@
 #define strtok_r strtok_s
 #endif
 
+#include <memory>
+
 #include <prdtoa.h>
 #include <prproces.h>
 #include <prtypes.h>
 
 #define PERMS755 PR_IRWXU | PR_IRGRP | PR_IXGRP | PR_IROTH | PR_IXOTH
 
+// std::unique_ptr uses delete, this little functor + typedef
+// is a shorthand for a unique_ptr that uses free, so we can store
+// strdup'ed pointers in them.
+struct freer {
+  void operator()(void* p) {
+    free(p);
+  }
+};
 
-
+typedef std::unique_ptr<char[], freer> strdup_ptr;
 
 CommandEventHandler::CommandLine::CommandLine(std::string line)
   : cmd("")
 {
-  std::vector<char> linec(line.begin(), line.end());
-  linec.push_back('\0');
-  char* cmdc = strtok(&linec[0], " \t");
+  strdup_ptr linec(strdup(line.c_str()));
+  char* cmdc = strtok(linec.get(), " \t");
   if (!cmdc)
     return;
   cmd = cmdc;
@@ -378,10 +387,9 @@ CommandEventHandler::exec(std::vector<std::string>& args)
   // if we have envs we have to handle them separately
   if (envs)
   {
-    std::vector<char> envVarStr(argi->begin(), argi->end());
-    envVarStr.push_back('\0');
+    strdup_ptr envVarStr(strdup(argi->c_str()));
     char *r_env;
-    char *env = strtok_r(&envVarStr[0], ",", &r_env);
+    char *env = strtok_r(envVarStr.get(), ",", &r_env);
     // now we have something like env1=val1
     while (env)
     {
@@ -863,9 +871,8 @@ CommandEventHandler::settime(std::vector<std::string>& args)
   datetime.tm_yday = 0;
   datetime.tm_isdst = -1;
 
-  std::vector<char> datec(dates.begin(), dates.end());
-  datec.push_back('\0');
-  char* tok = strtok(&datec[0], "/");
+  strdup_ptr datec(strdup(dates.c_str()));
+  char* tok = strtok(datec.get(), "/");
   while (tok)
   {
     ints.push_back(PR_strtod(tok, NULL));
@@ -880,9 +887,8 @@ CommandEventHandler::settime(std::vector<std::string>& args)
   datetime.tm_mday = ints[2];
 
   ints.clear();
-  std::vector<char> timec(times.begin(), times.end());
-  timec.push_back('\0');
-  tok = strtok(&timec[0], ":");
+  strdup_ptr timec(strdup(times.c_str()));
+  tok = strtok(timec.get(), ":");
   while (tok)
   {
     ints.push_back(PR_strtod(tok, NULL));

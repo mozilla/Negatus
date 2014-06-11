@@ -66,8 +66,9 @@ Config::setDefaultTestRoot()
   std::string mounts;
   if (readTextFile("/proc/mounts", mounts))
   {
-    std::vector<char> mountsc(mounts.begin(), mounts.end());
-    char* line = strtok(&mountsc[0], "\n");
+    char mountsc[mounts.size()+1];
+    strcpy(mountsc, mounts.c_str());
+    char* line = strtok(mountsc, "\n");
     while (line)
     {
       char* beg = strchr(line, ' ');
