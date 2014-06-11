@@ -895,7 +895,7 @@ CommandEventHandler::settime(std::vector<std::string>& args)
 #ifndef _WIN32
   struct timeval tv;
   struct timezone tz;
-  gettimeofday(NULL, &tz);
+  gettimeofday(&tv, &tz);
   tv.tv_sec = tsecs;
   tv.tv_usec = 0;
   settimeofday(&tv, &tz);
