@@ -3,6 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 #include "Hash.h"
+#include "Logging.h"
 #include "Subprocess.h"
 #ifdef _WIN32
 #include <windows.h>
@@ -62,18 +63,18 @@ fileHash(std::string path)
   }
 
   std::string result;
-  if (!failed)
+  if (failed)
+    return agentWarn("Failed to hash file");
+
+  BYTE hash_bytes[16];
+  DWORD size = sizeof(hash_bytes);
+  if (CryptGetHashParam(hash, HP_HASHVAL, hash_bytes, &size, 0))
   {
-    BYTE hash_bytes[16];
-    DWORD size = sizeof(hash_bytes);
-    if (CryptGetHashParam(hash, HP_HASHVAL, hash_bytes, &size, 0))
+    for (DWORD i = 0; i < size; i++)
     {
-      for (DWORD i = 0; i < size; i++)
-      {
-        char buf[3];
-        _snprintf_s(buf, 3, "%02x", hash_bytes[i]);
-        result.append(buf);
-      }
+      char buf[3];
+      _snprintf_s(buf, 3, "%02x", hash_bytes[i]);
+      result.append(buf);
     }
   }
 

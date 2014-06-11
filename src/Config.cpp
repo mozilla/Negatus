@@ -9,6 +9,7 @@
 #include <prio.h>
 #include <string.h>
 #include "Shell.h"
+#include "Strings.h"
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -66,9 +67,8 @@ Config::setDefaultTestRoot()
   std::string mounts;
   if (readTextFile("/proc/mounts", mounts))
   {
-    char mountsc[mounts.size()+1];
-    strcpy(mountsc, mounts.c_str());
-    char* line = strtok(mountsc, "\n");
+    strdup_ptr mountsc(strdup(mounts.c_str()));
+    char* line = strtok(mountsc.get(), "\n");
     while (line)
     {
       char* beg = strchr(line, ' ');

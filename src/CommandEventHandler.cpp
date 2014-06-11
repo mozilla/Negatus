@@ -49,17 +49,6 @@
 
 #define PERMS755 PR_IRWXU | PR_IRGRP | PR_IXGRP | PR_IROTH | PR_IXOTH
 
-// std::unique_ptr uses delete, this little functor + typedef
-// is a shorthand for a unique_ptr that uses free, so we can store
-// strdup'ed pointers in them.
-struct freer {
-  void operator()(void* p) {
-    free(p);
-  }
-};
-
-typedef std::unique_ptr<char[], freer> strdup_ptr;
-
 CommandEventHandler::CommandLine::CommandLine(std::string line)
   : cmd("")
 {
