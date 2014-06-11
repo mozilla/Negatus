@@ -495,7 +495,7 @@ CommandEventHandler::systime()
   PR_ExplodeTime(now, PR_LocalTimeParameters, &ts);
 
   char buffer[BUFSIZE];
-  sprintf(buffer, "%d/%02d/%02d %02d:%02d:%02d:%03d", ts.tm_year, ts.tm_month,
+  sprintf(buffer, "%d/%02d/%02d %02d:%02d:%02d:%03d", ts.tm_year, ts.tm_month+1,
     ts.tm_mday, ts.tm_hour, ts.tm_min, ts.tm_sec, ts.tm_usec / 1000);
 
   return std::string(buffer);
