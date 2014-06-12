@@ -12,10 +12,23 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 
 #include <string>
 #include <sstream>
+
+#ifdef _WIN32
+#define popen _popen
+#define pclose _pclose
+#define setenv(k, v, o) _putenv_s(k, v)
+#define unsetenv(k) _putenv_s(k, "")
+#define read _read
+typedef int ssize_t;
+#endif
 
 #define SUBPROCESS_BUFFER_SIZE 1024
 
@@ -57,7 +70,10 @@ SubprocessEventHandler::SubprocessEventHandler(
     return;
   }
 
+#ifndef _WIN32
+  //FIXME: this is all terrible
   fcntl(fileno(mP), F_SETFL, O_NONBLOCK);
+#endif
 
   Reactor::instance()->setTimeout(PR_MillisecondsToInterval(SUBPROCESS_POLL_PERIOD_MS), &mCommandEventHandler);
 }

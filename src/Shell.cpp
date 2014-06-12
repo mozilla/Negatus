@@ -9,15 +9,40 @@
 #include <string.h>
 #include "Logging.h"
 #include "Subprocess.h"
+#ifdef _WIN32
+#include <winsock2.h>
+#include <iphlpapi.h>
+#endif
+
+#include <vector>
+
+#ifdef _WIN32
+std::string
+mac_address_string(BYTE mac[MAX_ADAPTER_ADDRESS_LENGTH], DWORD length)
+{
+  std::string s;
+  for (DWORD i = 0; i < length; i++) {
+    if (i != 0) {
+      s.append(":");
+    }
+    char b[3];
+    _snprintf_s(b, 2, "%02x", mac[i]);
+    s.append(b);
+  }
+  return s;
+}
+#endif
 
 std::string
 id()
 {
-  std::string interfaces[3] = {"wlan0", "usb0", "lo"};
+#ifndef _WIN32
+  std::string interfaces[] = {"wlan0", "usb0", "eth0", "lo"};
+  const int kNumInterfaces = sizeof(interfaces) / sizeof(interfaces[0]);
   FILE *iface;
   char buffer[BUFSIZE];
 
-  for (int i = 0; i < 3; ++i)
+  for (int i = 0; i < kNumInterfaces; ++i)
   {
     sprintf(buffer, "/sys/class/net/%s/address", interfaces[i].c_str());
     iface = fopen(buffer, "r");
@@ -32,6 +57,19 @@ id()
 
     return std::string(buffer);
   }
+#else
+  DWORD size;
+  if (GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, nullptr,
+                           nullptr, &size) == ERROR_BUFFER_OVERFLOW) {
+    std::vector<IP_ADAPTER_ADDRESSES> addresses(size);
+    if (GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, nullptr,
+                             &addresses[0], &size) == ERROR_SUCCESS) {
+      PIP_ADAPTER_ADDRESSES aa = &addresses[0];
+      return mac_address_string(aa->PhysicalAddress,
+                                aa->PhysicalAddressLength);
+    }
+  }
+#endif
   return std::string("00:00:00:00:00:00");
 }
 

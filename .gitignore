@@ -1,7 +1,11 @@
 toolchain
 *.o
+*.obj
 .DS_Store
 agent
+agent.exe
 busybox-armv6l*
 *.swp
 *.log
+*~
+
