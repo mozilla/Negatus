@@ -9,6 +9,14 @@ include Makefile.common
 $(AGENT): $(OBJS)
 	$(LD) -o $@ $(OBJS) $(LDFLAGS) $(LDLIBS)
 
-%.o: %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+$(OBJS): .deps/dir
+.deps/dir:
+	mkdir -p .deps
+	touch $@
 
+%.o: %.cpp
+	$(CC) $(CFLAGS) $(CPPFLAGS) -MD -MP -MF .deps/$(@F).pp -c $< -o $@
+
+deps = $(addprefix .deps/,$(addsuffix .pp,$(notdir $(OBJS))))
+
+-include $(deps)
