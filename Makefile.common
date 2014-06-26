@@ -31,4 +31,4 @@ AGENT = agent$(EXE)
 all: $(AGENT)
 
 clean:
-	rm -f src/*$(OBJ) $(AGENT)
+	rm -rf src/*$(OBJ) $(AGENT) .deps

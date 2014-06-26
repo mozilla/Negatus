@@ -8,4 +8,4 @@ busybox-armv6l*
 *.swp
 *.log
 *~
-
+.deps/
