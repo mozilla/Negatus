@@ -7,6 +7,7 @@
 
 #include <prio.h>
 #include <prtypes.h>
+#include <stdlib.h>
 #include <memory>
 #include <string>
 
