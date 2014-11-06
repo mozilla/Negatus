@@ -8,6 +8,8 @@ LDFLAGS+=-arch i386
 CPPFLAGS=\
         -g \
         -arch i386 \
+        -mmacosx-version-min=10.7 \
+        -stdlib=libc++ \
         `/usr/local/bin/nspr-config --cflags`
 
 LDLIBS=`/usr/local/bin/nspr-config --libs`
