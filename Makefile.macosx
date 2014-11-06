@@ -5,13 +5,17 @@ CXX=g++
 LD:=$(CXX)
 LDFLAGS+=-arch i386
 
+ifndef NSPR
+NSPR=/usr/local
+endif
+
 CPPFLAGS=\
         -g \
         -arch i386 \
         -mmacosx-version-min=10.7 \
         -stdlib=libc++ \
-        `/usr/local/bin/nspr-config --cflags`
+        `$(NSPR)/bin/nspr-config --cflags`
 
-LDLIBS=`/usr/local/bin/nspr-config --libs`
+LDLIBS=`$(NSPR)/bin/nspr-config --libs`
 
 include Makefile
