@@ -3,7 +3,7 @@ CXX=g++
 # would have to replicate the link line that g++ uses.
 #LD=ld
 LD:=$(CXX)
-LDFLAGS+=-arch i386
+LDFLAGS+=-arch i386 -mmacosx-version-min=10.7 -stdlib=libc++
 
 CPPFLAGS=\
         -g \
