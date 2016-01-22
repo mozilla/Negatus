@@ -9,6 +9,10 @@ ifndef NSPR
 NSPR=/usr/local
 endif
 
+ifndef NSPR
+NSPR=/usr/local
+endif
+
 CPPFLAGS=\
         -g \
         -arch i386 \
